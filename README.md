@@ -1,3 +1,3 @@
-# Permutation-based information prevalence inference using the minimum statistic in MATLAB
+# Permutation-based prevalence inference in MATLAB
 
 – under construction –
