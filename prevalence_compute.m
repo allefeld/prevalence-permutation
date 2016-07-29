@@ -1,16 +1,16 @@
-function prevalence(a, P2, alpha)
+function prevalence_compute(a, P2, alpha)
 if nargin == 0, test_prevalence, return, end
 
 
 % permutation-based prevalence inference
 %
-% gamma0max = prevalence(inputfilenames, P2 = 1e6, outputfilename = 'prevalence', alpha = 0.05)
+% gamma0Max = prevalence(inputfilenames, P2 = 1e6, outputfilename = 'prevalence', alpha = 0.05)
 %
 % inputfilenames:   cell array of input image filenames, subjects x permutations
 % P2:               number of second-level permutations to perform
 % outputfilename:   output image filename
 % alpha:            significance level
-% gamma0max:        theoretical upper bound on gamma0
+% gamma0Max:        theoretical upper bound on gamma0
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
@@ -65,17 +65,17 @@ for j = 1 : P2
     
     % test statistic: minimum across subjects
     m = min(a(:, ind)');                                                        %#ok<UDIM>
-    % store result of neutral permutation, i.e. actual value, for each voxel
+    % store result of neutral permutation (actual value) for each voxel
     if j == 1
         m1 = m;
     end
     
-    % compare actual value with permutation value for each voxel separately;
+    % compare actual value with permutation value for each voxel separately,
     % determines uncorrected p-values for global null (see below)
-    uRank = uRank + (m >= m1);          % Eq. 24
-    % compare actual value at each voxel with maximum across voxels;
+    uRank = uRank + (m >= m1);          % part of Eq. 24
+    % compare actual value at each voxel with maximum across voxels,
     % determines corrected p-values for global null (see below)
-    cRank = cRank + (max(m) >= m1);     % Eq. 25 & 26
+    cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
 
     % calibrate reporting interval to be between 5 and 12.5 seconds
     if (nPermsReport == 1) && (toc >= 5)
@@ -89,23 +89,22 @@ for j = 1 : P2
         drawnow
         stop = ~ishandle(fh);
         
-        % compute results (following Step 5b)
-        % based on permutations performed so far: j plays the role of P2
+        % compute results (following Step 5b) based on permutations
+        % performed so far: j plays the role of P2
         
         % uncorrected p-values for global null hypothesis
-        puGN = uRank / j;               % Eq. 24
+        puGN = uRank / j;                       % part of Eq. 24
         % corrected p-values for global null hypothesis
-        pcGN = cRank / j;               % Eq. 25 & 26
-        % corrected significance level for global null hypothesis
-        alphac = (alpha - pcGN) ./ (1 - pcGN);
+        pcGN = cRank / j;                       % part of Eq. 26
         % significant voxels for global null hypothesis
-        sigGN = (puGN <= alphac);      % not necessarily the same as (pcGN <= alpha)!
-        % lower bound for prevalence
-        alphac(~sigGN) = nan;
-        gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N));
-        % upper bound for lower bound
-        alphacmax = (alpha - 1/j) / (1 - 1/j);
-        gamma0max = (alphacmax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));
+        sigGN = (pcGN <= alpha);
+        % lower bounds for prevalence
+        alphac = (alpha - pcGN) ./ (1 - pcGN);  % Eq. 22
+        gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N));      % Eq. 23
+        gamma0(alphac < puGN) = nan;            % undefined       
+        % upper bound for lower bounds
+        alphacMax = (alpha - 1/j) / (1 - 1/j);  % Eq. 27
+        gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));  % Eq. 27
         
         %         gamma0_c = 0.5;
         %         % uncorrected p-values for prevalence null hypothesis
@@ -124,9 +123,10 @@ for j = 1 : P2
             min(puGN))
         fprintf('    minimal corrected p-value for global null: %g\n', ...
             min(pcGN))
-        fprintf('    significant voxels for global null: %d\n', sum(sigGN))
-        fprintf('    significant voxels for global null: %d\n', sum(pcGN <= alpha))
-        fprintf('    maximal prevalence: %g\n', max(gamma0))
+        fprintf('    voxels at which global null is rejected: %d\n', sum(sigGN))
+        fprintf('    voxels at which prevalence bound is defined: %d\n', ...
+            sum(~isnan(gamma0)))
+        fprintf('    largest prevalence bound: %g\n', max(gamma0))
         fprintf('\n')
         
         % plot prevalence bounds
@@ -136,9 +136,11 @@ for j = 1 : P2
             figure(fh)
             clf
         end
-        plot(gamma0, '.')
+        plot([0.5, n + 0.5], gamma0Max * [1 1], 'r')
+        hold all
+        plot(gamma0, 'b.')
         title('prevalence inference')
-        line([0.5, n + 0.5], gamma0max * [1 1], 'Color', 'k')
+        
         axis([0.5, n + 0.5, 0, 1])
         xlabel('voxels')
         ylabel('\gamma_0')
@@ -160,8 +162,8 @@ for j = 1 : P2
     
 end
 
-% determine typical above-chance accuracies
-n = size(a, 1);
-at = nan(n, 1);
-% where the majority show an effect, compute median
-at(gamma0 >= 0.5) = median(a(gamma0 >= 0.5, :, 1), 2);
+% % determine typical above-chance accuracies
+% n = size(a, 1);
+% at = nan(n, 1);
+% % where the majority show an effect, compute median
+% at(gamma0 >= 0.5) = median(a(gamma0 >= 0.5, :, 1), 2);
