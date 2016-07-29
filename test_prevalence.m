@@ -1,9 +1,9 @@
 clear, close all
 
-n = 20;
+V = 1000;
 N = 12;
 P1 = 5;
-a = randn(n, N, P1);
-a(:, :, 1) = a(:, :, 1) + 2;
+a = randn(V, N, P1);
+a(:, :, 1) = bsxfun(@plus, a(:, :, 1), linspace(0, 2, V)');
 
 prevalence_compute(a)

@@ -31,17 +31,9 @@ if (nargin < 3) || isempty(alpha)
 end
 
 
-% prepare plot window
-fh = figure('Name', 'prevalence inference');
-text(0.5, 0.5, {'please wait for results', '', ...
-    'close window to stop computation at any time'}, 'HorizontalAlignment', 'center')
-axis off
-drawnow
-
 % init
 [n, N, P1] = size(a); % n: voxels, N: subjects, P1: first-level permutations
-fprintf('\n*** performing permutation-based prevalence inference ***\n\n')
-fprintf('generating %d of %d permutations\n', P2, P1 ^ N)
+fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
 if P2 > P1 ^ N
     error('Monte Carlo is inadequate!')  % implement enumeration of permutations?
 end
@@ -49,6 +41,14 @@ fprintf('the computation can be stopped at any time by closing the output window
 uRank = zeros(1, n);
 cRank = zeros(1, n);
 
+% prepare plot window
+fh = figure('Name', 'permutation-based prevalence inference');
+text(0.5, 0.5, {'please wait for results', '', ...
+    'close window to stop computation at any time'}, 'HorizontalAlignment', 'center')
+axis off
+drawnow
+
+% generate second-level permutations
 nPermsReport = 1;
 tic
 for j = 1 : P2
@@ -77,8 +77,8 @@ for j = 1 : P2
     % determines corrected p-values for global null (see below)
     cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
 
-    % calibrate reporting interval to be between 5 and 12.5 seconds
-    if (nPermsReport == 1) && (toc >= 5)
+    % calibrate reporting interval to be between 2 and 5 seconds
+    if (nPermsReport == 1) && (toc >= 2)
         nPermsReport = 10 ^ floor(log10(j)) * [1 2 5 10];
         nPermsReport = min(nPermsReport(nPermsReport >= j));
         nPermsReport = max(nPermsReport, 2);
@@ -106,6 +106,8 @@ for j = 1 : P2
         alphacMax = (alpha - 1/j) / (1 - 1/j);  % Eq. 27
         gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));  % Eq. 27
         
+%         (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)) >= 0.5
+        
         %         gamma0_c = 0.5;
         %         % uncorrected p-values for prevalence null hypothesis
         %         puPN = ((1 - gamma0_c) * puGN .^ (1/N) + gamma0_c) .^ N;
@@ -113,8 +115,8 @@ for j = 1 : P2
         %         pcPN = pcGN + (1 - pcGN) .* puPN;
         
         % print summary
-        fprintf('  %d permutations  = %.1f %%  (%.1f of %.1f min)\n', ...
-            j, j / P2 * 100, toc / 60, toc / 60 * P2 / j)
+        fprintf('  %d permutations, %.1f of %.1f min\n', ...
+            j, toc / 60, toc / 60 * P2 / j)
         fprintf('    minimal uncorrected rank: %d, reached at %d voxels\n', ...
             min(uRank), sum(uRank == min(uRank)))
         fprintf('    minimal corrected rank: %d, reached at %d voxels\n', ...
@@ -123,7 +125,8 @@ for j = 1 : P2
             min(puGN))
         fprintf('    minimal corrected p-value for global null: %g\n', ...
             min(pcGN))
-        fprintf('    voxels at which global null is rejected: %d\n', sum(sigGN))
+        fprintf('    voxels at which global null is rejected: %d\n', ...
+            sum(sigGN))
         fprintf('    voxels at which prevalence bound is defined: %d\n', ...
             sum(~isnan(gamma0)))
         fprintf('    largest prevalence bound: %g\n', max(gamma0))
@@ -131,7 +134,7 @@ for j = 1 : P2
         
         % plot prevalence bounds
         if stop
-            fh = figure('Name', 'prevalence inference');
+            fh = figure('Name', 'permutation-based prevalence inference');
         else
             figure(fh)
             clf
@@ -139,11 +142,10 @@ for j = 1 : P2
         plot([0.5, n + 0.5], gamma0Max * [1 1], 'r')
         hold all
         plot(gamma0, 'b.')
-        title('prevalence inference')
-        
         axis([0.5, n + 0.5, 0, 1])
+        title('permutation-based prevalence inference')
         xlabel('voxels')
-        ylabel('\gamma_0')
+        ylabel('lower bound \gamma_0')
         if n > 200
             set(gca, 'XTick', [])
         else
@@ -151,6 +153,11 @@ for j = 1 : P2
             if n > 20
                 set(gca, 'XTickLabel', [])
             end
+        end
+        if j < P2
+            text(n + 0.5, 1, sprintf('%.0f %% ', j / P2 * 100), ...
+                'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
+                'VerticalAlignment', 'top')
         end
         drawnow
 
