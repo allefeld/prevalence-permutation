@@ -32,14 +32,14 @@ end
 
 
 % init
-[n, N, P1] = size(a); % n: voxels, N: subjects, P1: first-level permutations
+[V, N, P1] = size(a); % n: voxels, N: subjects, P1: first-level permutations
 fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
 if P2 > P1 ^ N
-    error('Monte Carlo is inadequate!')  % implement enumeration of permutations?
+    error('Monte Carlo implementation is inadequate!')  % implement enumeration of permutations?
 end
 fprintf('the computation can be stopped at any time by closing the output window\n\n')
-uRank = zeros(1, n);
-cRank = zeros(1, n);
+uRank = zeros(1, V);
+cRank = zeros(1, V);
 
 % prepare plot window
 fh = figure('Name', 'permutation-based prevalence inference');
@@ -115,27 +115,31 @@ for j = 1 : P2
         gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
         
         % print summary
-        fprintf('  %d permutations, %.1f of %.1f min\n', ...
-            j, toc / 60, toc / 60 * P2 / j)
-        fprintf('    minimal uncorrected rank: %d, reached at %d voxels\n', ...
+        fprintf('  %d of %d permutations,  %.1f of %.1f min\n', ...
+            j, P2, toc / 60, toc / 60 * P2 / j)
+        fprintf('    minimal rank\n')
+        fprintf('      uncorrected:  %d,  reached at %d voxels\n', ...
             min(uRank), sum(uRank == min(uRank)))
-        fprintf('    minimal corrected rank: %d, reached at %d voxels\n', ...
+        fprintf('      corrected:    %d,  reached at %d voxels\n', ...
             min(cRank), sum(cRank == min(cRank)))
-        fprintf('    minimal uncorrected p-value for global null: %g\n', ...
+        fprintf('    minimal p-value for global null\n')
+        fprintf('      uncorrected:  %g\n', ...
             min(puGN))
-        fprintf('    minimal corrected p-value for global null: %g\n', ...
+        fprintf('      corrected:    %g\n', ...
             min(pcGN))
-        fprintf('    voxels at which global null is rejected: %d\n', ...
-            sum(sigGN))
-        fprintf('    minimal uncorrected p-value for majority null: %g\n', ...
+        fprintf('    minimal p-value for majority null\n')
+        fprintf('      uncorrected:  %g\n', ...
             min(puMN))
-        fprintf('    minimal corrected p-value for majority null: %g\n', ...
+        fprintf('      corrected:    %g\n', ...
             min(pcMN))
-        fprintf('    voxels at which majority null is rejected: %d\n', ...
+        fprintf('    number of voxels (of %d) at which\n', V)
+        fprintf('      global null is rejected:      %d\n', ...
+            sum(sigGN))
+        fprintf('      majority null is rejected:    %d\n', ...
             sum(sigMN))
-        fprintf('    voxels at which prevalence bound is defined: %d\n', ...
+        fprintf('      prevalence bound is defined:  %d\n', ...
             sum(~isnan(gamma0)))
-        fprintf('    largest prevalence bound: %g\n', max(gamma0))
+        fprintf('    largest prevalence bound:  %g\n', max(gamma0))
         fprintf('\n')
         
         % plot prevalence bounds
@@ -145,23 +149,23 @@ for j = 1 : P2
             figure(fh)
             clf
         end
-        plot([0.5, n + 0.5], gamma0Max * [1 1], 'r')
+        plot([0.5, V + 0.5], gamma0Max * [1 1], 'r')
         hold all
         plot(gamma0, 'b.')
-        axis([0.5, n + 0.5, 0, 1])
+        axis([0.5, V + 0.5, 0, 1])
         title('permutation-based prevalence inference')
         xlabel('voxels')
         ylabel('lower bound \gamma_0')
-        if n > 200
+        if V > 200
             set(gca, 'XTick', [])
         else
-            set(gca, 'XTick', 1 : n)
-            if n > 20
+            set(gca, 'XTick', 1 : V)
+            if V > 20
                 set(gca, 'XTickLabel', [])
             end
         end
         if j < P2
-            text(n + 0.5, 1, sprintf('%.0f %% ', j / P2 * 100), ...
+            text(V + 0.5, 1, sprintf('%.0f %% ', j / P2 * 100), ...
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
         end
