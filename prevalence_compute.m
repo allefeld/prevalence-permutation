@@ -1,16 +1,14 @@
 function prevalence_compute(a, P2, alpha)
-if nargin == 0, test_prevalence, return, end
-
+if nargin == 0, test_prevalence, return, end    % HACK
 
 % permutation-based prevalence inference
+% 
+% prevalence_compute(a, P2 = 1e6, alpha = 0.05)
 %
-% gamma0Max = prevalence(inputfilenames, P2 = 1e6, outputfilename = 'prevalence', alpha = 0.05)
-%
-% inputfilenames:   cell array of input image filenames, subjects x permutations
-% P2:               number of second-level permutations to perform
-% outputfilename:   output image filename
+% a:                three-dimensional array of test statistic values
+%                   voxels x subjects x first-level permutations
+% P2:               number of second-level permutations to generate
 % alpha:            significance level
-% gamma0Max:        theoretical upper bound on gamma0
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
@@ -23,13 +21,13 @@ if nargin == 0, test_prevalence, return, end
 % warranty of merchantability or fitness for a particular purpose. See the
 % GNU General Public License <http://www.gnu.org/licenses/> for more details.
 
+% default parameter values
 if (nargin < 2) || isempty(P2)
     P2 = 1e6;
 end
 if (nargin < 3) || isempty(alpha)
     alpha = 0.05;
 end
-
 
 % init
 [V, N, P1] = size(a); % n: voxels, N: subjects, P1: first-level permutations
@@ -38,8 +36,6 @@ if P2 > P1 ^ N
     error('Monte Carlo implementation is inadequate!')  % implement enumeration of permutations?
 end
 fprintf('the computation can be stopped at any time by closing the output window\n\n')
-uRank = zeros(1, V);
-cRank = zeros(1, V);
 
 % prepare plot window
 fh = figure('Name', 'permutation-based prevalence inference');
@@ -49,6 +45,8 @@ axis off
 drawnow
 
 % generate second-level permutations
+uRank = zeros(1, V);
+cRank = zeros(1, V);
 nPermsReport = 1;
 tic
 for j = 1 : P2
@@ -64,7 +62,7 @@ for j = 1 : P2
     ind = sub2ind([N, P1], (1 : N)', sp);
     
     % test statistic: minimum across subjects
-    m = min(a(:, ind)');                                                        %#ok<UDIM>
+    m = min(a(:, ind)');                                                    %#ok<UDIM>
     % store result of neutral permutation (actual value) for each voxel
     if j == 1
         m1 = m;
@@ -105,6 +103,9 @@ for j = 1 : P2
         pcMN = pcGN + (1 - pcGN) .* puMN;
         % significant voxels for majority null hypothesis
         sigMN = (pcMN <= alpha);
+        % lower bound on corrected p-values for majority null hypothesis
+        puMNMin = ((1 - 0.5) * 1/j .^ (1/N) + 0.5) .^ N;
+        pcMNMin = 1/j + (1 - 1/j) .* puMNMin;
         % * Step 5b: compute lower bounds for prevalence
         % lower bounds for prevalence
         alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
@@ -149,13 +150,14 @@ for j = 1 : P2
             figure(fh)
             clf
         end
-        plot([0.5, V + 0.5], gamma0Max * [1 1], 'r')
+        subplot(2, 1, 1)
+        plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
         hold all
+        plot([0.5, V + 0.5], gamma0Max * [1 1], 'r')
         plot(gamma0, 'b.')
         axis([0.5, V + 0.5, 0, 1])
         title('permutation-based prevalence inference')
-        xlabel('voxels')
-        ylabel('lower bound \gamma_0')
+        ylabel('prevalence lower bound')
         if V > 200
             set(gca, 'XTick', [])
         else
@@ -169,15 +171,33 @@ for j = 1 : P2
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
         end
+        subplot(2, 1, 2)
+        semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
+        hold all
+        plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
+        plot(pcMN, '.b')
+        xlim([0.5, V + 0.5])
+        xlabel('voxels')
+        ylabel('p-value majority null')
+        if V > 200
+            set(gca, 'XTick', [])
+        else
+            set(gca, 'XTick', 1 : V)
+            if V > 20
+                set(gca, 'XTickLabel', [])
+            end
+        end
         drawnow
 
         if stop
-            fprintf('computation stopped\n')
+            fprintf('computation has been stopped\n')
             break
         end
     end
     
 end
+
+%%% what to return?
 
 % % determine typical above-chance accuracies
 % n = size(a, 1);

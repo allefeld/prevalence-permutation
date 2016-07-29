@@ -65,14 +65,7 @@ V = sum(mask(:));
 % a is now a matrix of size V x N x P1
 
 
-%% call prevalence.m
-
-
-%% determine typical above-chance accuracies
-V = size(a, 1);
-at = nan(V, 1);
-% where the majority show an effect, compute median
-at(gamma0 >= 0.5) = median(a(gamma0 >= 0.5, :, 1), 2);
+%% call prevalence_compute.m
 
 
 %% save results
