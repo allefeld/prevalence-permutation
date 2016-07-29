@@ -4,6 +4,6 @@ n = 20;
 N = 12;
 P1 = 5;
 a = randn(n, N, P1);
-a(:, :, 1) = 1;
+a(:, :, 1) = a(:, :, 1) + 1;
 
-prevalence(a)
+prevalence_compute(a)
