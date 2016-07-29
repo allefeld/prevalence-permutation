@@ -89,30 +89,30 @@ for j = 1 : P2
         drawnow
         stop = ~ishandle(fh);
         
-        % compute results (following Step 5b) based on permutations
-        % performed so far: j plays the role of P2
-        
+        % compute results,
+        % based on permutations performed so far: j plays the role of P2 
         % uncorrected p-values for global null hypothesis
-        puGN = uRank / j;                       % part of Eq. 24
+        puGN = uRank / j;                               % part of Eq. 24
         % corrected p-values for global null hypothesis
-        pcGN = cRank / j;                       % part of Eq. 26
+        pcGN = cRank / j;                               % part of Eq. 26
         % significant voxels for global null hypothesis
         sigGN = (pcGN <= alpha);
+        % * Step 5a: compute p-values for given prevalence bound
+        % specifically 0.5, i.e for the majority null hypothesis
+        % uncorrected p-values for majority null hypothesis
+        puMN = ((1 - 0.5) * puGN .^ (1/N) + 0.5) .^ N;  % Eq. 19
+        % corrected p-values for majority null hypothesis
+        pcMN = pcGN + (1 - pcGN) .* puMN;
+        % significant voxels for majority null hypothesis
+        sigMN = (pcMN <= alpha);
+        % * Step 5b: compute lower bounds for prevalence
         % lower bounds for prevalence
-        alphac = (alpha - pcGN) ./ (1 - pcGN);  % Eq. 22
-        gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N));      % Eq. 23
-        gamma0(alphac < puGN) = nan;            % undefined       
+        alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
+        gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
+        gamma0(alphac < puGN) = nan;                    % undefined       
         % upper bound for lower bounds
-        alphacMax = (alpha - 1/j) / (1 - 1/j);  % Eq. 27
-        gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));  % Eq. 27
-        
-%         (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)) >= 0.5
-        
-        %         gamma0_c = 0.5;
-        %         % uncorrected p-values for prevalence null hypothesis
-        %         puPN = ((1 - gamma0_c) * puGN .^ (1/N) + gamma0_c) .^ N;
-        %         % corrected p-values for prevalence null hypothesis
-        %         pcPN = pcGN + (1 - pcGN) .* puPN;
+        alphacMax = (alpha - 1/j) / (1 - 1/j);          % Eq. 27
+        gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
         
         % print summary
         fprintf('  %d permutations, %.1f of %.1f min\n', ...
@@ -127,6 +127,12 @@ for j = 1 : P2
             min(pcGN))
         fprintf('    voxels at which global null is rejected: %d\n', ...
             sum(sigGN))
+        fprintf('    minimal uncorrected p-value for majority null: %g\n', ...
+            min(puMN))
+        fprintf('    minimal corrected p-value for majority null: %g\n', ...
+            min(pcMN))
+        fprintf('    voxels at which majority null is rejected: %d\n', ...
+            sum(sigMN))
         fprintf('    voxels at which prevalence bound is defined: %d\n', ...
             sum(~isnan(gamma0)))
         fprintf('    largest prevalence bound: %g\n', max(gamma0))
