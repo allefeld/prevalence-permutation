@@ -1,9 +1,22 @@
 clear, close all
 
-V = 1000;
 N = 12;
-P1 = 5;
-a = randn(V, N, P1);
-a(:, :, 1) = bsxfun(@plus, a(:, :, 1), linspace(0, 2, V)');
+P1 = 16;
+ifn = cell(N, P1);
 
-prevalence_compute(a)
+for i = 1 : N
+    for j = 1 : P1
+        ifn{i, j} = sprintf('cichy-2011-smoothedaccuracy/%02d/sa_C0002_P%04d.nii.gz', i, j);
+    end
+end
+
+for i = 1 : N
+    for j = 1 : P1
+        fn = gunzip(ifn{i, j}, tempname);
+        ifn{i, j} = fn{1};
+    end
+end
+
+ifn
+
+% v = spm_vol(fn);
