@@ -1,4 +1,4 @@
-function gamma0max = prevalence(inputfilenames, P2, outputfilename, alpha)
+function prevalence(ifn, P2, ofn, alpha)
 
 % permutation-based prevalence inference
 %
@@ -24,32 +24,41 @@ function gamma0max = prevalence(inputfilenames, P2, outputfilename, alpha)
 if (nargin < 2) || isempty(P2)
     P2 = 1e6;
 end
-if (nargin < 3) || isempty(outputfilename)
-    outputfilename = 'prevalence';
+if (nargin < 3) || isempty(ofn)
+    ofn = 'prevalence';
 end
 if nargin < 4
     alpha = 0.05;
 end
-[N, P1] = size(inputfilenames);
+[N, P1] = size(ifn);
 
 
 %% load and prepare accuracies
 
-fprintf('\n*** prevalence ***\n\n')
+fprintf('\n*** permutation-based prevalence inference ***\n\n')
 fprintf('loading data\n')
 
-% load accuracy images
-a = cell(N, P1);
+% load test statistic images
+a = cell(N, P1);    %  how to initialize vol?
 for k = 1 : N
     fprintf('  subject #%d: ', k)
     for i = 1 : P1
-        vol = spm_vol(inputfilenames{k, i});
-        Y = spm_read_vols(vol);
+        gz = ~isempty(regexp(ifn{k, i}, '.gz$', 'once')); % gzipped image?
+        if gz
+            tfn = gunzip(ifn{k, i}, tempdir);   % gunzip to temporary file
+            ifn{k, i} = tfn{1};
+        end
+        vol(k, i) = spm_vol(ifn{k, i});                                     %#ok<AGROW>
+        Y = spm_read_vols(vol(k, i));
         a{k, i} = Y(:);
+        if gz
+            delete(tfn{1})
+        end
         fprintf('.')
     end
     fprintf('\n')
 end
+spm_check_orientations(vol(:));
 % a is now a cell array of size N x P1, where each cell contains voxel
 % values in one column vector
 a = cell2mat(reshape(a, [1, N, P1]));
@@ -58,24 +67,24 @@ a = cell2mat(reshape(a, [1, N, P1]));
 % determine mask from data; out-of-mask voxels may be NaN or 0
 mask = all(all(~isnan(a), 2), 3) & ~any(all(a == 0, 3), 2);
 mask = reshape(mask, size(Y));
-
 % truncate data to in-mask voxels
 a = a(mask, :, :);
-V = sum(mask(:));
-% a is now a matrix of size V x N x P1
+% a is now a matrix of size (number of in-mask voxels) x N x P1
 
 
 %% call prevalence_compute.m
+
+prevalence_compute(a, P2, alpha)
 
 
 %% save results
 
 data = nan(size(mask));
 data(mask) = gamma0;
-saveMRImage(data, [outputfilename '_gamma0.nii'], vol.mat, 'prevalence map')
+saveMRImage(data, [ofn '_gamma0.nii'], vol.mat, 'prevalence map')
 data = nan(size(mask));
 data(mask) = at;
-saveMRImage(data, [outputfilename '_typical.nii'], vol.mat, 'typical map')
-saveMRImage(uint8(mask), [outputfilename '_mask.nii'], vol.mat, 'prevalence map mask')
+saveMRImage(data, [ofn '_typical.nii'], vol.mat, 'typical map')
+saveMRImage(uint8(mask), [ofn '_mask.nii'], vol.mat, 'prevalence map mask')
 % stored mask values end up to be 1.00000005913898 instead of 1 – why?
 

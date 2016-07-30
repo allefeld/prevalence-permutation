@@ -30,7 +30,7 @@ if (nargin < 3) || isempty(alpha)
 end
 
 % init
-[V, N, P1] = size(a); % n: voxels, N: subjects, P1: first-level permutations
+[V, N, P1] = size(a); % V: voxels, N: subjects, P1: first-level permutations
 fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
 if P2 > P1 ^ N
     error('Monte Carlo implementation is inadequate!')  % implement enumeration of permutations?
@@ -190,7 +190,7 @@ for j = 1 : P2
         drawnow
 
         if stop
-            fprintf('computation has been stopped\n')
+            warning('computation has been stopped')
             break
         end
     end
@@ -200,7 +200,6 @@ end
 %%% what to return?
 
 % % determine typical above-chance accuracies
-% n = size(a, 1);
-% at = nan(n, 1);
+% at = nan(V, 1);
 % % where the majority show an effect, compute median
 % at(gamma0 >= 0.5) = median(a(gamma0 >= 0.5, :, 1), 2);

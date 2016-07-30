@@ -4,19 +4,10 @@ N = 12;
 P1 = 16;
 ifn = cell(N, P1);
 
-for i = 1 : N
-    for j = 1 : P1
-        ifn{i, j} = sprintf('cichy-2011-smoothedaccuracy/%02d/sa_C0002_P%04d.nii.gz', i, j);
+for k = 1 : N
+    for i = 1 : P1
+        ifn{k, i} = sprintf('cichy-2011-category-smoothedaccuracy/%02d/sa_C0002_P%04d.nii.gz', k, i);
     end
 end
 
-for i = 1 : N
-    for j = 1 : P1
-        fn = gunzip(ifn{i, j}, tempname);
-        ifn{i, j} = fn{1};
-    end
-end
-
-ifn
-
-% v = spm_vol(fn);
+prevalence(ifn, 1e4)
