@@ -78,7 +78,7 @@ fprintf('\n')
 
 %% perform prevalence inference
 
-prevalence_compute(a, P2, alpha)
+[results, param] = prevalence_compute(a, P2, alpha);
 
 
 %% save results

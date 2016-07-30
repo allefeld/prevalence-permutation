@@ -1,13 +1,17 @@
-function prevalence_compute(a, P2, alpha)
+function [results, param] = prevalence_compute(a, P2, alpha)
 
 % permutation-based prevalence inference
 % 
-% prevalence_compute(a, P2 = 1e6, alpha = 0.05)
+% [results, param] = prevalence_compute(a, P2 = 1e6, alpha = 0.05)
 %
 % a:                three-dimensional array of test statistic values
 %                   voxels x subjects x first-level permutations
 % P2:               number of second-level permutations to generate
 % alpha:            significance level
+% results:
+%                   puGN pcGN puMN pcMN gamma0 aTypical
+% param:
+%                   V N P1 P2 alpha pcMNMin gamma0Max
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
@@ -200,14 +204,23 @@ for j = 1 : P2
     
 end
 
-1;
+% determine typical above-chance accuracies
+aTypical = nan(V, 1);
+aTypical(sigMN) = median(a(sigMN, :, 1), 2);
 
-%%% what to return?
-% puGN pcGN puMN pcMN gamma0
-% puMNMin pcMNMin gamma0Max P2 alpha N V
-% +atypical
-
-% % determine typical above-chance accuracies
-% atypical = nan(V, 1);
-% % where the majority show an effect, compute median
-% atypical(sigMN) = median(a(sigMN, :, 1), 2);
+% prepare return values
+param = struct;
+param.V = V;
+param.N = N;
+param.P1 = P1;
+param.P2 = P2;
+param.alpha = alpha;
+param.pcMNMin = pcMNMin;
+param.gamma0Max = gamma0Max;
+results = struct;
+results.puGN = puGN;
+results.pcGN = pcGN;
+results.puMN = puMN;
+results.pcMN = pcMN;
+results.gamma0 = gamma0;
+results.atypical = aTypical;
