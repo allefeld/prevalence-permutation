@@ -10,4 +10,5 @@ for k = 1 : N
     end
 end
 
-prevalence(ifn, 1e4)
+% initialize rng for reproducibility
+prevalence(ifn, 2000)

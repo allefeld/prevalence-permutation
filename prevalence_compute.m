@@ -1,5 +1,4 @@
 function prevalence_compute(a, P2, alpha)
-if nargin == 0, test_prevalence, return, end    % HACK
 
 % permutation-based prevalence inference
 % 
@@ -190,16 +189,25 @@ for j = 1 : P2
         drawnow
 
         if stop
+            s = warning('query', 'backtrace');
+            warning off backtrace
             warning('computation has been stopped')
+            warning(s)
+            P2 = j;
             break
         end
     end
     
 end
 
+1;
+
 %%% what to return?
+% puGN pcGN puMN pcMN gamma0
+% puMNMin pcMNMin gamma0Max P2 alpha N V
+% +atypical
 
 % % determine typical above-chance accuracies
-% at = nan(V, 1);
+% atypical = nan(V, 1);
 % % where the majority show an effect, compute median
-% at(gamma0 >= 0.5) = median(a(gamma0 >= 0.5, :, 1), 2);
+% atypical(sigMN) = median(a(sigMN, :, 1), 2);

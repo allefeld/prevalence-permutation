@@ -1,4 +1,5 @@
 function prevalence(ifn, P2, ofn, alpha)
+if nargin == 0, test_prevalence, return, end    % HACK
 
 % permutation-based prevalence inference
 %
@@ -30,18 +31,19 @@ end
 if nargin < 4
     alpha = 0.05;
 end
-[N, P1] = size(ifn);
+
+fprintf('\n*** permutation-based prevalence inference ***\n\n')
 
 
 %% load and prepare accuracies
 
-fprintf('\n*** permutation-based prevalence inference ***\n\n')
-fprintf('loading data\n')
+[N, P1] = size(ifn);
+fprintf('loading data: %d subjects, %d first-level permutations\n', N, P1)
 
 % load test statistic images
 a = cell(N, P1);    %  how to initialize vol?
 for k = 1 : N
-    fprintf('  subject #%d: ', k)
+    fprintf('  subject #%d ', k)
     for i = 1 : P1
         gz = ~isempty(regexp(ifn{k, i}, '.gz$', 'once')); % gzipped image?
         if gz
@@ -63,16 +65,18 @@ spm_check_orientations(vol(:));
 % values in one column vector
 a = cell2mat(reshape(a, [1, N, P1]));
 % a is now a matrix of size (number of voxels) x N x P1
+fprintf('%d voxels, ', size(a, 1));
 
 % determine mask from data; out-of-mask voxels may be NaN or 0
 mask = all(all(~isnan(a), 2), 3) & ~any(all(a == 0, 3), 2);
-mask = reshape(mask, size(Y));
 % truncate data to in-mask voxels
 a = a(mask, :, :);
 % a is now a matrix of size (number of in-mask voxels) x N x P1
+fprintf('%d in-mask\n', size(a, 1));
+fprintf('\n')
 
 
-%% call prevalence_compute.m
+%% perform prevalence inference
 
 prevalence_compute(a, P2, alpha)
 
