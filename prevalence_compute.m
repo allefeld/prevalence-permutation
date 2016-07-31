@@ -1,17 +1,29 @@
 function [results, param] = prevalence_compute(a, P2, alpha)
 
-% permutation-based prevalence inference
+% permutation-based prevalence inference, pure implementation
 % 
 % [results, param] = prevalence_compute(a, P2 = 1e6, alpha = 0.05)
 %
-% a:                three-dimensional array of test statistic values
-%                   voxels x subjects x first-level permutations
-% P2:               number of second-level permutations to generate
-% alpha:            significance level
-% results:
-%                   puGN pcGN puMN pcMN gamma0 aTypical
-% param:
-%                   V N P1 P2 alpha pcMNMin gamma0Max
+% a:            three-dimensional array of test statistic values
+%               (voxels x subjects x first-level permutations)
+%               a(:, :, 1) must contain actual values
+% P2:           number of second-level permutations to generate
+% alpha:        significance level
+% results:      per-voxel analysis results
+%   .puGN         uncorrected p-values for global null
+%   .pcGN         corrected p-values for global null
+%   .puMN         uncorrected p-values for majority null
+%   .pcMN         corrected p-values for majority null
+%   .gamma0       prevalence lower bounds
+%   .aTypical     typical values of test statistic where pcMN <= alpha
+% param:        analysis parameters and properties
+%   .V            number of voxels
+%   .N            number of subjects
+%   .P1           number of first-level permutations
+%   .P2           number of second-level permutations actually generated
+%   .alpha        significance level
+%   .pcMNMin      smallest possible corrected p-value for majority null
+%   .gamma0Max    largest possible prevalence lower bound
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
@@ -36,7 +48,8 @@ end
 [V, N, P1] = size(a); % V: voxels, N: subjects, P1: first-level permutations
 fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
 if P2 > P1 ^ N
-    error('Monte Carlo implementation is inadequate!')  % implement enumeration of permutations?
+    error('Monte Carlo implementation is inadequate!')
+    % implement full enumeration of permutations?
 end
 fprintf('the computation can be stopped at any time by closing the output window\n\n')
 
@@ -146,13 +159,14 @@ for j = 1 : P2
         fprintf('    largest prevalence bound:  %g\n', max(gamma0))
         fprintf('\n')
         
-        % plot prevalence bounds
+        % plot
         if stop
             fh = figure('Name', 'permutation-based prevalence inference');
         else
             figure(fh)
             clf
         end
+        % prevalence bounds
         subplot(2, 1, 1)
         plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
         hold all
@@ -174,6 +188,7 @@ for j = 1 : P2
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
         end
+        % majority null p-values
         subplot(2, 1, 2)
         semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
         hold all
@@ -204,11 +219,11 @@ for j = 1 : P2
     
 end
 
-% determine typical above-chance accuracies
+% where majority null can be rejected, typical value of test statistic
 aTypical = nan(V, 1);
 aTypical(sigMN) = median(a(sigMN, :, 1), 2);
 
-% prepare return values
+% collect return values
 param = struct;
 param.V = V;
 param.N = N;

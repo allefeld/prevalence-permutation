@@ -1,7 +1,7 @@
 function prevalence(ifn, P2, ofn, alpha)
 if nargin == 0, test_prevalence, return, end    % HACK
 
-% permutation-based prevalence inference
+% permutation-based prevalence inference, for MR image files
 %
 % gamma0max = prevalence(inputfilenames, P2 = 1e6, outputfilename = 'prevalence', alpha = 0.05)
 %
