@@ -18,5 +18,5 @@ For more information on input and output parameters, use `help prevalence` and `
 
 The script `prevalenceTest` tests the implementation using smoothed images of cross-validated classification accuracy, derived from the data acquired by Cichy, Chen & Haynes (2011). See the subdirectory `cichy-2011-category-smoothedaccuracy` for more information. The script can also serve as an example of how to use `prevalence`.
 
-This software was developed with SPM8 under Matlab R2015a, but later versions should work, too. It is released under the terms of the GNU General Public License, version 3 or later; see [LICENSE](LICENSE) for details.
+This software was developed with SPM8 under Matlab R2015a, but later versions should work, too. It is released under the terms of the GNU General Public License, version 3 or later.
 
