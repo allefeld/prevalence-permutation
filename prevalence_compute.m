@@ -63,8 +63,8 @@ axis off
 drawnow
 
 % generate second-level permutations
-uRank = zeros(1, V);
-cRank = zeros(1, V);
+uRank = zeros(V, 1);
+cRank = zeros(V, 1);
 nPermsReport = 1;
 tic
 for j = 1 : P2
@@ -80,7 +80,7 @@ for j = 1 : P2
     ind = sub2ind([N, P1], (1 : N)', sp);
     
     % test statistic: minimum across subjects
-    m = min(a(:, ind)');                                                    %#ok<UDIM>
+    m = min(a(:, ind), [], 2);
     % store result of neutral permutation (actual value) for each voxel
     if j == 1
         m1 = m;
