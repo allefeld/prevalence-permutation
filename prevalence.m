@@ -1,6 +1,6 @@
 function prevalence(ifn, P2, alpha, prefix)
 
-% permutation-based prevalence inference, for MR image files
+% permutation-based prevalence inference
 %
 % prevalence(ifn, P2 = 1e6, alpha = 0.05, prefix = 'prevalence_')
 %
@@ -86,7 +86,7 @@ fprintf('%d in-mask\n', size(a, 1));
 fprintf('\n')
 
 % perform prevalence inference
-[results, params] = prevalence_compute(a, P2, alpha);                       %#ok<ASGLU>
+[results, params] = prevalenceCore(a, P2, alpha);                       %#ok<ASGLU>
 
 % save
 fprintf('saving results and parameters\n')

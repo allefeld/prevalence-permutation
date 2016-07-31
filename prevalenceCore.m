@@ -1,8 +1,8 @@
-function [results, params] = prevalence_compute(a, P2, alpha)
+function [results, params] = prevalenceCore(a, P2, alpha)
 
-% permutation-based prevalence inference, pure implementation
+% permutation-based prevalence inference, implementation core
 % 
-% [results, params] = prevalence_compute(a, P2 = 1e6, alpha = 0.05)
+% [results, params] = prevalenceCore(a, P2 = 1e6, alpha = 0.05)
 %
 % a:            three-dimensional array of test statistic values
 %               (voxels x subjects x first-level permutations)
