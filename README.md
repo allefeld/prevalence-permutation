@@ -12,7 +12,7 @@ To perform the actual analysis, `prevalence` calls the function:
 
     [results, params] = prevalenceCore(a, P2, alpha)
 
-It can also be used directly, for input data that do not have the form of image files. This function has no external dependencies.
+It can also be used directly, for input data that do not have the form of image files. The function provides a simple graphical display of the analysis results, which is updated while more second-level permutations are generated. This function has no external dependencies.
 
 For more information on input and output parameters, use `help prevalence` and `help prevalenceCore` under Matlab.
 
