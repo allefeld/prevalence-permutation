@@ -1,4 +1,5 @@
-% test the implementation of permutation-based prevalence inference
+% test the implementation of 'permutation-based prevalence inference
+% using the minimum statistic'
 %
 % This script uses the data contained in the subdirectory
 % cichy-2011-category-smoothedaccuracy to test the present implementation

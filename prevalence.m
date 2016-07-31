@@ -1,6 +1,6 @@
 function prevalence(ifn, P2, alpha, prefix)
 
-% permutation-based prevalence inference
+% permutation-based prevalence inference using the minimum statistic
 %
 % prevalence(ifn, P2 = 1e6, alpha = 0.05, prefix = 'prevalence_')
 %
@@ -48,7 +48,7 @@ if nargin < 4
     alpha = 0.05;
 end
 
-fprintf('\n*** permutation-based prevalence inference ***\n\n')
+fprintf('\n*** permutation-based prevalence inference using the minimum statistic ***\n\n')
 
 % load and prepare test statistic data
 [N, P1] = size(ifn);

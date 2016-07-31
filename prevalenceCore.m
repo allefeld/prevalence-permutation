@@ -1,6 +1,6 @@
 function [results, params] = prevalenceCore(a, P2, alpha)
 
-% permutation-based prevalence inference, implementation core
+% permutation-based prevalence inference using the minimum statistic, core
 % 
 % [results, params] = prevalenceCore(a, P2 = 1e6, alpha = 0.05)
 %
@@ -56,7 +56,7 @@ end
 fprintf('the computation can be stopped at any time by closing the output window\n\n')
 
 % prepare plot window
-fh = figure('Name', 'permutation-based prevalence inference');
+fh = figure('Name', 'permutation-based prevalence inference using the minimum statistic');
 text(0.5, 0.5, {'please wait for results', '', ...
     'close window to stop computation at any time'}, 'HorizontalAlignment', 'center')
 axis off
@@ -163,7 +163,7 @@ for j = 1 : P2
         
         % graphical display
         if stop
-            fh = figure('Name', 'permutation-based prevalence inference');
+            fh = figure('Name', 'permutation-based prevalence inference using the minimum statistic');
         else
             % make figure current without getting in the way
             set(groot, 'CurrentFigure', fh)
