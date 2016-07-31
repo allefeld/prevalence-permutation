@@ -161,11 +161,12 @@ for j = 1 : P2
         fprintf('    largest prevalence bound:  %g\n', max(gamma0))
         fprintf('\n')
         
-        % plot
+        % graphical display
         if stop
             fh = figure('Name', 'permutation-based prevalence inference');
         else
-            figure(fh)
+            % make figure current without getting in the way
+            set(groot, 'CurrentFigure', fh)
             clf
         end
         % prevalence bounds
@@ -175,8 +176,8 @@ for j = 1 : P2
         plot([0.5, V + 0.5], gamma0Max * [1 1], 'r')
         plot(gamma0, 'b.')
         axis([0.5, V + 0.5, 0, 1])
-        title('permutation-based prevalence inference')
-        ylabel('prevalence lower bound')
+        title('prevalence lower bounds')
+        ylabel('\gamma_0')
         if V > 200
             set(gca, 'XTick', [])
         else
@@ -197,8 +198,9 @@ for j = 1 : P2
         plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
         plot(pcMN, '.b')
         xlim([0.5, V + 0.5])
+        title('p-values majority null')
         xlabel('voxels')
-        ylabel('p-value majority null')
+        ylabel('p^*_N(m | \gamma \leq 0.5)')
         if V > 200
             set(gca, 'XTick', [])
         else
