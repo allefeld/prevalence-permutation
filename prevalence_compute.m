@@ -25,6 +25,8 @@ function [results, param] = prevalence_compute(a, P2, alpha)
 %   .pcMNMin      smallest possible corrected p-value for majority null
 %   .gamma0Max    largest possible prevalence lower bound
 %
+% See also prevalence.
+%
 %
 % Copyright (C) 2016 Carsten Allefeld
 %

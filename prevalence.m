@@ -1,15 +1,29 @@
-function prevalence(ifn, P2, ofn, alpha)
-if nargin == 0, test_prevalence, return, end    % HACK
+function prevalence(ifn, P2, alpha, prefix)
 
 % permutation-based prevalence inference, for MR image files
 %
-% gamma0max = prevalence(inputfilenames, P2 = 1e6, outputfilename = 'prevalence', alpha = 0.05)
+% prevalence(ifn, P2 = 1e6, alpha = 0.05, prefix = 'prevalence_')
 %
-% inputfilenames:   cell array of input image filenames, subjects x permutations
-% P2:               number of second-level permutations to perform
-% outputfilename:   output image filename
-% alpha:            significance level
-% gamma0max:        theoretical upper bound on gamma0
+% ifn:     cell array of input image filenames of test statistic values
+%          (subjects x permutations)
+%          images in ifn(:, 1) must contain actual values
+% P2:      number of second-level permutations to perform
+% prefix:  prefix for output files
+% alpha:   significance level
+%
+% Results are written to files that begin with the string given in
+% `prefix`. By including a path in `prefix`, the output file directory can
+% be specified; otherwise files are written to the current directory.
+%
+% With the default prefix, analysis results are written to the files
+%   prevalence_puGN.nii, prevalence_pcGN.nii, prevalence_puMN.nii,
+%   prevalence_pcMN.nii, prevalence_gamma0.nii, & prevalence_aTypical.nii.
+% Additionally, the brain mask is written to prevalence_mask.nii, and
+% analysis parameters and properties to prevalence_param.mat.
+% For a detailed explanation, see output parameters `results` and `params`
+% of prevalence_compute.
+%
+% See also prevalence_compute.
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
@@ -22,11 +36,13 @@ if nargin == 0, test_prevalence, return, end    % HACK
 % warranty of merchantability or fitness for a particular purpose. See the
 % GNU General Public License <http://www.gnu.org/licenses/> for more details.
 
+if nargin == 0, test_prevalence, return, end    % HACK
+
 if (nargin < 2) || isempty(P2)
     P2 = 1e6;
 end
-if (nargin < 3) || isempty(ofn)
-    ofn = 'prevalence';
+if (nargin < 3) || isempty(prefix)
+    prefix = 'prevalence_';
 end
 if nargin < 4
     alpha = 0.05;
@@ -85,10 +101,10 @@ fprintf('\n')
 
 data = nan(size(mask));
 data(mask) = gamma0;
-saveMRImage(data, [ofn '_gamma0.nii'], vol.mat, 'prevalence map')
+saveMRImage(data, [prefix 'gamma0.nii'], vol.mat, 'prevalence map')
 data = nan(size(mask));
 data(mask) = at;
-saveMRImage(data, [ofn '_typical.nii'], vol.mat, 'typical map')
-saveMRImage(uint8(mask), [ofn '_mask.nii'], vol.mat, 'prevalence map mask')
+saveMRImage(data, [prefix 'typical.nii'], vol.mat, 'typical map')
+saveMRImage(uint8(mask), [prefix '_mask.nii'], vol.mat, 'prevalence map mask')
 % stored mask values end up to be 1.00000005913898 instead of 1 – why?
 
