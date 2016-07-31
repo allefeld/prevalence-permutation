@@ -6,7 +6,7 @@ The main user interface is given by the function:
 
     prevalence(ifn, P2, alpha, prefix)
 
-It takes a two-dimensional cell array of image filenames as input, which reference MR images of a given test statistic in several subjects (rows) and under several first-level permutations (columns), where the 1st column has to be based on the original (unpermuted) data. Results of prevalence inference are written to several image files. [SPM](http://www.fil.ion.ucl.ac.uk/spm/) functions are used to read and write image files, which therefore has to be installed.
+It takes a two-dimensional cell array of image filenames as input, which reference MR images of a given test statistic in several subjects (rows) and under several first-level permutations (columns), where the 1st column has to be based on the original (unpermuted) data. Results of prevalence inference are written to several image files. [SPM](http://www.fil.ion.ucl.ac.uk/spm/) functions are used to read and write image files, which therefore has to be installed. Images can be read in NIfTI and Analyze format as well as gzipped NIfTI, and are written as NIfTI files.
 
 To perform the actual analysis, `prevalence` calls the function:
 
@@ -18,7 +18,5 @@ For more information on input and output parameters, use `help prevalence` and `
 
 The script `prevalenceTest` tests the implementation using smoothed images of cross-validated classification accuracy, derived from the data acquired by Cichy, Chen & Haynes (2011). See the subdirectory `cichy-2011-category-smoothedaccuracy` for more information. The script can also serve as an example of how to use `prevalence`.
 
-This implementation was developed with SPM8 under Matlab R2015a, but later version should work, too.
-
-This software is released under the terms of the GNU General Public License, version 3 or later. See the file `LICENSE` for details.
+This software was developed with SPM8 under Matlab R2015a, but later versions should work, too. It is released under the terms of the GNU General Public License, version 3 or later; see [LICENSE](LICENSE) for details.
 
