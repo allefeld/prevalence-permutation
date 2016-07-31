@@ -10,20 +10,30 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % P2:           number of second-level permutations to generate
 % alpha:        significance level
 % results:      per-voxel analysis results
-%   .puGN         uncorrected p-values for global null                  (Eq. 24)
-%   .pcGN         corrected p-values for global null                    (Eq. 26)
-%   .puMN         uncorrected p-values for majority null                (Eq. 19 for gamma0 = 0.5)
-%   .pcMN         corrected p-values for majority null                  (Eq. 21 for gamma0 = 0.5)
-%   .gamma0       prevalence lower bounds                               (Eq. 23)
-%   .aTypical     median values of test statistic where pcMN <= alpha   (Fig. 4b)
+%   .puGN         uncorrected p-values for global null hypothesis         (Eq. 24)
+%   .pcGN         corrected p-values for global null hypothesis           (Eq. 26)
+%   .puMN         uncorrected p-values for majority null hypothesis       (Eq. 19)
+%   .pcMN         corrected p-values for majority null hypothesis         (Eq. 21)
+%   .gamma0       prevalence lower bounds                                 (Eq. 23)
+%   .aTypical     median values of test statistic where pcMN <= alpha     (Fig. 4b)
 % params:        analysis parameters and properties
 %   .V            number of voxels
 %   .N            number of subjects
 %   .P1           number of first-level permutations
 %   .P2           number of second-level permutations actually generated
 %   .alpha        significance level
-%   .pcMNMin      smallest possible corrected p-value for majority null
-%   .gamma0Max    largest possible prevalence lower bound               (Eq. 27)
+%   .pcMNMin      smallest possible corrected p-value for majority H0
+%   .gamma0Max    largest possible prevalence lower bound                 (Eq. 27)
+%
+% The 'majority null hypothesis' referenced here is a special case of the
+% prevalence null hypothesis (Eq. 17), where the critical value is gamma0 =
+% 0.5. It describes the situation where there is no effect in the majority
+% of subjects in the population. Rejecting it allows to infer that there is
+% an effect in the majority of subjects in the population. aTypical is only
+% defined where the (spatially extended) majority null hypothesis can be
+% rejected. Compare Fig. 4b and 'What does it mean for an effect to be
+% ‘typical’ in the population?' in the Discussion of Allefeld, Görgen and
+% Haynes (2016).
 %
 % See also prevalence.
 %
@@ -51,7 +61,7 @@ end
 fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
 if P2 > P1 ^ N
     error('Monte Carlo implementation is inadequate!')
-    % implement full enumeration of permutations?
+    % implement full enumeration of permutations? (Issue #1)
 end
 fprintf('the computation can be stopped at any time by closing the output window\n\n')
 
@@ -87,10 +97,10 @@ for j = 1 : P2
     end
     
     % compare actual value with permutation value for each voxel separately,
-    % determines uncorrected p-values for global null (see below)
+    % determines uncorrected p-values for global null hypothesis (see below)
     uRank = uRank + (m >= m1);          % part of Eq. 24
     % compare actual value at each voxel with maximum across voxels,
-    % determines corrected p-values for global null (see below)
+    % determines corrected p-values for global null hypothesis (see below)
     cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
 
     % calibrate reporting interval to be between 2 and 5 seconds
@@ -114,7 +124,7 @@ for j = 1 : P2
         % significant voxels for global null hypothesis
         sigGN = (pcGN <= alpha);
         % * Step 5a: compute p-values for given prevalence bound
-        % specifically 0.5, i.e for the majority null hypothesis
+        % (here specifically gamma0 = 0.5, i.e the majority null hypothesis)
         % uncorrected p-values for majority null hypothesis
         puMN = ((1 - 0.5) * puGN .^ (1/N) + 0.5) .^ N;  % Eq. 19
         % corrected p-values for majority null hypothesis
@@ -141,22 +151,22 @@ for j = 1 : P2
             min(uRank), sum(uRank == min(uRank)))
         fprintf('      corrected:    %d,  reached at %d voxels\n', ...
             min(cRank), sum(cRank == min(cRank)))
-        fprintf('    minimal p-value for global null\n')
+        fprintf('    minimal p-value for global null hypothesis\n')
         fprintf('      uncorrected:  %g\n', ...
             min(puGN))
         fprintf('      corrected:    %g\n', ...
             min(pcGN))
-        fprintf('    minimal p-value for majority null\n')
+        fprintf('    minimal p-value for majority null hypothesis\n')
         fprintf('      uncorrected:  %g\n', ...
             min(puMN))
         fprintf('      corrected:    %g\n', ...
             min(pcMN))
         fprintf('    number of voxels (of %d) at which\n', V)
-        fprintf('      global null is rejected:      %d\n', ...
+        fprintf('      global null hypothesis is rejected:    %d\n', ...
             sum(sigGN))
-        fprintf('      majority null is rejected:    %d\n', ...
+        fprintf('      majority null hypothesis is rejected:  %d\n', ...
             sum(sigMN))
-        fprintf('      prevalence bound is defined:  %d\n', ...
+        fprintf('      prevalence bound is defined:           %d\n', ...
             sum(~isnan(gamma0)))
         fprintf('    largest prevalence bound:  %g\n', max(gamma0))
         fprintf('\n')
@@ -191,14 +201,14 @@ for j = 1 : P2
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
         end
-        % majority null p-values
+        % majority null hypothesis p-values
         subplot(2, 1, 2)
         semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
         hold all
         plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
         plot(pcMN, '.b')
         xlim([0.5, V + 0.5])
-        title('p-values majority null')
+        title('p-values majority null hypothesis')
         xlabel('voxels')
         ylabel('p^*_N(m | \gamma \leq 0.5)')
         if V > 200
@@ -223,7 +233,7 @@ for j = 1 : P2
     
 end
 
-% where majority null can be rejected, typical value of test statistic
+% where majority null hypothesis can be rejected, typical value of test statistic
 aTypical = nan(V, 1);
 aTypical(sigMN) = median(a(sigMN, :, 1), 2);
 
