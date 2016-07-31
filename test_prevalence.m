@@ -11,4 +11,10 @@ for k = 1 : N
 end
 
 % initialize rng for reproducibility
-prevalence(ifn, 2000)
+
+tn = tempname;
+mkdir(tn);
+prefix = fullfile(tn, 'prevalence_');
+
+prevalence(ifn, 2000, 0.05, prefix)
+

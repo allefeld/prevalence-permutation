@@ -19,7 +19,7 @@ function prevalence(ifn, P2, alpha, prefix)
 %   prevalence_puGN.nii, prevalence_pcGN.nii, prevalence_puMN.nii,
 %   prevalence_pcMN.nii, prevalence_gamma0.nii, & prevalence_aTypical.nii.
 % Additionally, the brain mask is written to prevalence_mask.nii, and
-% analysis parameters and properties to prevalence_param.mat.
+% analysis parameters and properties to prevalence_params.mat.
 % For a detailed explanation, see output parameters `results` and `params`
 % of prevalence_compute.
 %
@@ -50,13 +50,9 @@ end
 
 fprintf('\n*** permutation-based prevalence inference ***\n\n')
 
-
-%% load and prepare accuracies
-
+% load and prepare test statistic data
 [N, P1] = size(ifn);
 fprintf('loading data: %d subjects, %d first-level permutations\n', N, P1)
-
-% load test statistic images
 a = cell(N, P1);    %  how to initialize vol?
 for k = 1 : N
     fprintf('  subject #%d ', k)
@@ -77,12 +73,10 @@ for k = 1 : N
     fprintf('\n')
 end
 spm_check_orientations(vol(:));
-% a is now a cell array of size N x P1, where each cell contains voxel
-% values in one column vector
+% a is now a cell array of size N x P1, containing voxel value columns vectors
 a = cell2mat(reshape(a, [1, N, P1]));
 % a is now a matrix of size (number of voxels) x N x P1
 fprintf('%d voxels, ', size(a, 1));
-
 % determine mask from data; out-of-mask voxels may be NaN or 0
 mask = all(all(~isnan(a), 2), 3) & ~any(all(a == 0, 3), 2);
 % truncate data to in-mask voxels
@@ -91,20 +85,19 @@ a = a(mask, :, :);
 fprintf('%d in-mask\n', size(a, 1));
 fprintf('\n')
 
+% perform prevalence inference
+[results, params] = prevalence_compute(a, P2, alpha);                       %#ok<ASGLU>
 
-%% perform prevalence inference
-
-[results, param] = prevalence_compute(a, P2, alpha);
-
-
-%% save results
-
-data = nan(size(mask));
-data(mask) = gamma0;
-saveMRImage(data, [prefix 'gamma0.nii'], vol.mat, 'prevalence map')
-data = nan(size(mask));
-data(mask) = at;
-saveMRImage(data, [prefix 'typical.nii'], vol.mat, 'typical map')
-saveMRImage(uint8(mask), [prefix '_mask.nii'], vol.mat, 'prevalence map mask')
-% stored mask values end up to be 1.00000005913898 instead of 1 – why?
-
+% save
+% per-voxel analysis results
+f = fields(results);
+for fi = 1 : numel(f)
+    data = nan(vol(1).dim);
+    data(mask) = getfield(results, f{fi});                                  %#ok<GFLD>
+    saveMRImage(data, [prefix f{fi} '.nii'], vol(1).mat, f{fi})
+end
+% brain mask (values end up to be 1.00000005913898 instead of 1 – why?)
+mask = reshape(mask, vol(1).dim);
+saveMRImage(uint8(mask), [prefix 'mask.nii'], vol(1).mat, 'prevalence brain mask')
+% analysis parameters and properties
+save([prefix 'params'], '-struct', 'params')

@@ -1,8 +1,8 @@
-function [results, param] = prevalence_compute(a, P2, alpha)
+function [results, params] = prevalence_compute(a, P2, alpha)
 
 % permutation-based prevalence inference, pure implementation
 % 
-% [results, param] = prevalence_compute(a, P2 = 1e6, alpha = 0.05)
+% [results, params] = prevalence_compute(a, P2 = 1e6, alpha = 0.05)
 %
 % a:            three-dimensional array of test statistic values
 %               (voxels x subjects x first-level permutations)
@@ -16,7 +16,7 @@ function [results, param] = prevalence_compute(a, P2, alpha)
 %   .pcMN         corrected p-values for majority null
 %   .gamma0       prevalence lower bounds
 %   .aTypical     typical values of test statistic where pcMN <= alpha
-% param:        analysis parameters and properties
+% params:        analysis parameters and properties
 %   .V            number of voxels
 %   .N            number of subjects
 %   .P1           number of first-level permutations
@@ -226,18 +226,18 @@ aTypical = nan(V, 1);
 aTypical(sigMN) = median(a(sigMN, :, 1), 2);
 
 % collect return values
-param = struct;
-param.V = V;
-param.N = N;
-param.P1 = P1;
-param.P2 = P2;
-param.alpha = alpha;
-param.pcMNMin = pcMNMin;
-param.gamma0Max = gamma0Max;
+params = struct;
+params.V = V;
+params.N = N;
+params.P1 = P1;
+params.P2 = P2;
+params.alpha = alpha;
+params.pcMNMin = pcMNMin;
+params.gamma0Max = gamma0Max;
 results = struct;
 results.puGN = puGN;
 results.pcGN = pcGN;
 results.puMN = puMN;
 results.pcMN = pcMN;
 results.gamma0 = gamma0;
-results.atypical = aTypical;
+results.aTypical = aTypical;
