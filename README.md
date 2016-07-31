@@ -1,4 +1,4 @@
-# Permutation-based information prevalence inference using the minimum statistic
+# Permutation-based prevalence inference using the minimum statistic
 
 This is an implementation for Matlab of the method proposed by Carsten Allefeld, Kai Görgen and John-Dylan Haynes, 'Valid population inference for information-based imaging: From the second-level *t*-test to prevalence inference', [*NeuroImage* 2016](http://dx.doi.org/10.1016/j.neuroimage.2016.07.040). In that paper the method was introduced as a way to perform population inference for classification accuracy and other information-like measures and and  called 'permutation-based *information* prevalence inference using the minimum statistic'. Since it can just as well be applied to other first-level summary statistics, the method is here generically referred to as 'permutation-based prevalence inference using the minimum statistic', or 'prevalence inference' for short.
 
