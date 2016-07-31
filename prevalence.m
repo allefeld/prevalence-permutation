@@ -89,6 +89,7 @@ fprintf('\n')
 [results, params] = prevalence_compute(a, P2, alpha);                       %#ok<ASGLU>
 
 % save
+fprintf('saving results and parameters\n')
 % per-voxel analysis results
 f = fields(results);
 for fi = 1 : numel(f)
