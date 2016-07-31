@@ -10,12 +10,12 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % P2:           number of second-level permutations to generate
 % alpha:        significance level
 % results:      per-voxel analysis results
-%   .puGN         uncorrected p-values for global null
-%   .pcGN         corrected p-values for global null
-%   .puMN         uncorrected p-values for majority null
-%   .pcMN         corrected p-values for majority null
-%   .gamma0       prevalence lower bounds
-%   .aTypical     typical values of test statistic where pcMN <= alpha
+%   .puGN         uncorrected p-values for global null                  (Eq. 24)
+%   .pcGN         corrected p-values for global null                    (Eq. 26)
+%   .puMN         uncorrected p-values for majority null                (Eq. 19 for gamma0 = 0.5)
+%   .pcMN         corrected p-values for majority null                  (Eq. 21 for gamma0 = 0.5)
+%   .gamma0       prevalence lower bounds                               (Eq. 23)
+%   .aTypical     median values of test statistic where pcMN <= alpha   (Fig. 4b)
 % params:        analysis parameters and properties
 %   .V            number of voxels
 %   .N            number of subjects
@@ -23,7 +23,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .P2           number of second-level permutations actually generated
 %   .alpha        significance level
 %   .pcMNMin      smallest possible corrected p-value for majority null
-%   .gamma0Max    largest possible prevalence lower bound
+%   .gamma0Max    largest possible prevalence lower bound               (Eq. 27)
 %
 % See also prevalence.
 %
