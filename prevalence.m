@@ -21,10 +21,12 @@ function prevalence(ifn, P2, alpha, prefix)
 % Additionally, the brain mask is written to prevalence_mask.nii, and
 % analysis parameters and properties to prevalence_params.mat.
 % For a detailed explanation, see output parameters `results` and `params`
-% of prevalence_compute.
+% of prevalenceCore.
 %
-% See also prevalence_compute.
+% See also prevalenceCore
 %
+%
+% Part of https://github.com/allefeld/prevalence-permutation
 %
 % Copyright (C) 2016 Carsten Allefeld
 %
@@ -35,8 +37,6 @@ function prevalence(ifn, P2, alpha, prefix)
 % it will be useful, but without any warranty; without even the implied
 % warranty of merchantability or fitness for a particular purpose. See the
 % GNU General Public License <http://www.gnu.org/licenses/> for more details.
-
-if nargin == 0, test_prevalence, return, end    % HACK
 
 if (nargin < 2) || isempty(P2)
     P2 = 1e6;

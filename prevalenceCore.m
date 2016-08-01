@@ -1,7 +1,8 @@
 function [results, params] = prevalenceCore(a, P2, alpha)
 
 % permutation-based prevalence inference using the minimum statistic, core
-% 
+% implementation of the method proposed by Allefeld, Goergen and Haynes (2016)
+%
 % [results, params] = prevalenceCore(a, P2 = 1e6, alpha = 0.05)
 %
 % a:            three-dimensional array of test statistic values
@@ -32,8 +33,13 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % an effect in the majority of subjects in the population. aTypical is only
 % defined where the (spatially extended) majority null hypothesis can be
 % rejected. Compare Fig. 4b and 'What does it mean for an effect to be
-% ‘typical’ in the population?' in the Discussion of Allefeld, Görgen and
+% "typical" in the population?' in the Discussion of Allefeld, Goergen and
 % Haynes (2016).
+%
+% The function opens a figure window that shows results based on the
+% permutations generated so far and is regularly updated. If this window is
+% closed, the computation is stopped (not aborted) and results are returned
+% based on the permutations so far.
 %
 % See also prevalence.
 %
@@ -102,7 +108,7 @@ for j = 1 : P2
     % compare actual value at each voxel with maximum across voxels,
     % determines corrected p-values for global null hypothesis (see below)
     cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
-
+    
     % calibrate reporting interval to be between 2 and 5 seconds
     if (nPermsReport == 1) && (toc >= 2)
         nPermsReport = 10 ^ floor(log10(j)) * [1 2 5 10];
@@ -116,7 +122,7 @@ for j = 1 : P2
         stop = ~ishandle(fh);
         
         % compute results,
-        % based on permutations performed so far: j plays the role of P2 
+        % based on permutations performed so far: j plays the role of P2
         % uncorrected p-values for global null hypothesis
         puGN = uRank / j;                               % part of Eq. 24
         % corrected p-values for global null hypothesis
@@ -138,14 +144,13 @@ for j = 1 : P2
         % lower bounds for prevalence
         alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
         gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
-        gamma0(alphac < puGN) = nan;                    % undefined       
+        gamma0(alphac < puGN) = nan;                    % undefined
         % upper bound for lower bounds
         alphacMax = (alpha - 1/j) / (1 - 1/j);          % Eq. 27
         gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
         
         % print summary
-        fprintf('  %d of %d permutations,  %.1f of %.1f min\n', ...
-            j, P2, toc / 60, toc / 60 * P2 / j)
+        fprintf('  %d of %d permutations\n', j, P2)
         fprintf('    minimal rank\n')
         fprintf('      uncorrected:  %d,  reached at %d voxels\n', ...
             min(uRank), sum(uRank == min(uRank)))
@@ -197,7 +202,11 @@ for j = 1 : P2
             end
         end
         if j < P2
-            text(V + 0.5, 1, sprintf('%.0f %% ', j / P2 * 100), ...
+            text(0.5, 1, sprintf(' %.0f %%', j / P2 * 100), ...
+                'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'left', ...
+                'VerticalAlignment', 'top')
+            text(V + 0.5, 1, sprintf('%.1f / %.1f min ', ...
+                toc / 60, toc / 60 * P2 / j), ...
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
         end
@@ -220,7 +229,7 @@ for j = 1 : P2
             end
         end
         drawnow
-
+        
         if stop
             s = warning('query', 'backtrace');
             warning off backtrace

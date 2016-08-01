@@ -9,8 +9,12 @@
 % It can also be taken as an example for how to use the implementation.
 %
 % With parameter P2 changed to 1e7, this script should reproduce the
-% results shown in Allefeld, Görgen & Haynes (2016), Fig 4a and b, except
+% results shown in Allefeld, Goergen & Haynes (2016), Fig 4a and b, except
 % for minor differences due to Monte Carlo estimation.
+%
+% WARNING: The script resets the random number generator to a fixed seed in
+% order to obtain reproducible results. Make sure to reinitialize it again
+% to a time-based seed aftewards: rng('shuffle')
 %
 % On 2016-7-31 with Matlab 8.5.0 (R2015a) and SPM8 r4290 under Linux 3.16,
 % this script generated image files with the following md5 checksums:
@@ -26,12 +30,12 @@ clear, close all
 
 % collect input image filenames
 N = 12;
-P1 = 16;
-ifnPat = 'cichy-2011-category-smoothedaccuracy/%02d/sa_C0002_P%04d.nii.gz';
-ifn = cell(N, P1);
+P1 = 4 ; 16;
+inputPat = 'cichy-2011-category-smoothedaccuracy/%02d/sa_C0002_P%04d.nii.gz';
+input = cell(N, P1);
 for k = 1 : N
     for i = 1 : P1
-        ifn{k, i} = sprintf(ifnPat, k, i);
+        input{k, i} = sprintf(inputPat, k, i);
     end
 end
 
@@ -39,20 +43,24 @@ end
 tn = tempname;
 mkdir(tn);
 
-% initialize the random number generator for reproducibilty, to always
-% obtain exactly the same Monte Carlo result
-% in normal use, the rng should be initialized by `rng('shuffle')` on
-% startup.
+% initialize the random number generator for reproducibilty
+% In normal use, the rng should be initialized by `rng('shuffle')` on
+% Matlab startup and not changed during the session.
 rng(42)
 
 % perform prevalence inference
-P2 = 200000;
+P2 = 200; %000;
 alpha = 0.05;
 prefix = [tn '/prevalence_'];
-prevalence(ifn, P2, alpha, prefix)
+prevalence(input, P2, alpha, prefix)
+rng('shuffle')
 
 % compute checksums of results, needs md5sum to be installed on the system
 fprintf('\nchecksums of results:\n')
-system(['md5sum ' tn '/*.nii']);
+if isunix
+    system(['md5sum ' tn '/*.nii']);
+else
+    system(['certutil -hashfile ' tn '/*.nii MD5']); % DOES THIS WORK?
+end
 
 fprintf('\nconsider deleting the directory %s and its contents\n', tn)

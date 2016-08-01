@@ -13,6 +13,7 @@ function V = saveMRImage(data, filename, mat, descrip)
 % The file format is determined by the filename extension.
 % The data type is is determined by the class of data.
 %
+%
 % Copyright (C) 2013–2016 Carsten Allefeld
 %
 % This program is free software: you can redistribute it and/or modify it
