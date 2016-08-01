@@ -26,8 +26,6 @@ function prevalence(ifn, P2, alpha, prefix)
 % See also prevalenceCore
 %
 %
-% Part of https://github.com/allefeld/prevalence-permutation
-%
 % Copyright (C) 2016 Carsten Allefeld
 %
 % This program is free software: you can redistribute it and/or modify it
