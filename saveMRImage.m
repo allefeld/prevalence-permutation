@@ -14,6 +14,9 @@ function V = saveMRImage(data, filename, mat, descrip)
 % The data type is is determined by the class of data.
 %
 %
+% This file is part of v1.0.0 of prevalence-permutation, see
+% https://github.com/allefeld/prevalence-permutation/releases
+%
 % Copyright (C) 2013–2016 Carsten Allefeld
 %
 % This program is free software: you can redistribute it and/or modify it
