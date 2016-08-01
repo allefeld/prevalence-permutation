@@ -47,6 +47,3 @@ example of how to use `prevalence`.
 This software was developed with SPM8 under Matlab R2015a, but later
 versions should work, too. It is released under the terms of the GNU
 General Public License, version 3 or later.
-
-    This file is part of v1.0.0 of prevalence-permutation, see
-    https://github.com/allefeld/prevalence-permutation/releases
