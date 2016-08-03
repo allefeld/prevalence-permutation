@@ -64,7 +64,7 @@ prefix = [tn '/prevalence_'];
 prevalence(input, P2, alpha, prefix)
 rng('shuffle')
 
-% compute checksums of results, needs md5sum to be installed on the system
+% compute checksums of results
 fprintf('\nchecksums of results:\n')
 if isunix
     system(['md5sum ' tn '/*.nii']);

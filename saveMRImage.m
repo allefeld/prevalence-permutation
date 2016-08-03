@@ -11,7 +11,7 @@ function V = saveMRImage(data, filename, mat, descrip)
 % V:            spm volume struct
 %
 % The file format is determined by the filename extension.
-% The data type is is determined by the class of data.
+% The data type is determined by the class of data.
 %
 %
 % Copyright (C) 2013–2016 Carsten Allefeld
@@ -37,7 +37,7 @@ if size(data, 4) > 1
 end
 
 if isfloat(data) && ~isreal(data)
-    warning('only real part of complex data is written')
+    warning('only the real part of complex data is written')
     data = real(data);
 end
 
