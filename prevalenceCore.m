@@ -37,9 +37,24 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % Haynes (2016).
 %
 % The function opens a figure window that shows results based on the
-% permutations generated so far and is regularly updated. If this window is
-% closed, the computation is stopped (not aborted) and results are returned
+% permutations generated so far and is regularly updated. If it is closed,
+% the computation is stopped (not aborted) and results are returned 
 % based on the permutations so far.
+%
+% The window shows in the upper panel
+%  – pcMN for all voxels as blue dots,
+%  – pcMNMin as a red line, and
+%  – alpha as a black line (significance threshold),
+% and in the lower panel
+%  – gamma0c for all voxels as blue dots,
+%  – gamma0cMax as a red line, and
+%  – 0.5 as a black line (majority threshold).
+% The two panels are complementary representations of the same result,
+% corresponding to algorithm Step 5a and 5b, respectively (see paper).
+% If many blue dots lie on the red line in either panel, this indicates
+% that a more differentiated picture might be obtained from more
+% permutations. (However, the amount of additional permutations needed for
+% that might be computationally unfeasible.)
 %
 % See also prevalence.
 %
@@ -184,15 +199,33 @@ for j = 1 : P2
             set(groot, 'CurrentFigure', fh)
             clf
         end
-        % prevalence bounds
+        % majority null hypothesis p-values
         subplot(2, 1, 1)
+        semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
+        hold all
+        plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
+        plot(pcMN, '.b')
+        xlim([0.5, V + 0.5])
+        title('p-values majority null hypothesis')
+        ylabel('p^*_N(m | \gamma \leq 0.5)')
+        if V > 200
+            set(gca, 'XTick', [])
+        else
+            set(gca, 'XTick', 1 : V)
+            if V > 20
+                set(gca, 'XTickLabel', [])
+            end
+        end
+        % prevalence bounds
+        subplot(2, 1, 2)
         plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
         hold all
         plot([0.5, V + 0.5], gamma0cMax * [1 1], 'r')
         plot(gamma0c, 'b.')
         axis([0.5, V + 0.5, 0, 1])
         title('prevalence lower bounds')
-        ylabel('\gamma_0')
+        xlabel('voxels')
+        ylabel('\gamma_0^*')
         if V > 200
             set(gca, 'XTick', [])
         else
@@ -209,24 +242,6 @@ for j = 1 : P2
                 toc / 60, toc / 60 * P2 / j), ...
                 'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
                 'VerticalAlignment', 'top')
-        end
-        % majority null hypothesis p-values
-        subplot(2, 1, 2)
-        semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
-        hold all
-        plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
-        plot(pcMN, '.b')
-        xlim([0.5, V + 0.5])
-        title('p-values majority null hypothesis')
-        xlabel('voxels')
-        ylabel('p^*_N(m | \gamma \leq 0.5)')
-        if V > 200
-            set(gca, 'XTick', [])
-        else
-            set(gca, 'XTick', 1 : V)
-            if V > 20
-                set(gca, 'XTickLabel', [])
-            end
         end
         drawnow
         
