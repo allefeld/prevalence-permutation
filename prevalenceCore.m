@@ -15,7 +15,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .pcGN         corrected p-values for global null hypothesis           (Eq. 26)
 %   .puMN         uncorrected p-values for majority null hypothesis       (Eq. 19)
 %   .pcMN         corrected p-values for majority null hypothesis         (Eq. 21)
-%   .gamma0       prevalence lower bounds                                 (Eq. 23)
+%   .gamma0c      corrected prevalence lower bounds                       (Eq. 23)
 %   .aTypical     median values of test statistic where pcMN <= alpha     (Fig. 4b)
 % params:        analysis parameters and properties
 %   .V            number of voxels
@@ -24,7 +24,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .P2           number of second-level permutations actually generated
 %   .alpha        significance level
 %   .pcMNMin      smallest possible corrected p-value for majority H0
-%   .gamma0Max    largest possible prevalence lower bound                 (Eq. 27)
+%   .gamma0cMax   largest possible corrected prevalence lower bound       (Eq. 27)
 %
 % The 'majority null hypothesis' referenced here is a special case of the
 % prevalence null hypothesis (Eq. 17), where the critical value is gamma0 =
@@ -134,7 +134,7 @@ for j = 1 : P2
         % uncorrected p-values for majority null hypothesis
         puMN = ((1 - 0.5) * puGN .^ (1/N) + 0.5) .^ N;  % Eq. 19
         % corrected p-values for majority null hypothesis
-        pcMN = pcGN + (1 - pcGN) .* puMN;
+        pcMN = pcGN + (1 - pcGN) .* puMN;               % Eq. 21
         % significant voxels for majority null hypothesis
         sigMN = (pcMN <= alpha);
         % lower bound on corrected p-values for majority null hypothesis
@@ -143,11 +143,11 @@ for j = 1 : P2
         % * Step 5b: compute lower bounds for prevalence
         % lower bounds for prevalence
         alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
-        gamma0 = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
-        gamma0(alphac < puGN) = nan;                    % undefined
+        gamma0c = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
+        gamma0c(alphac < puGN) = nan;                   % undefined
         % upper bound for lower bounds
         alphacMax = (alpha - 1/j) / (1 - 1/j);          % Eq. 27
-        gamma0Max = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
+        gamma0cMax = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
         
         % print summary
         fprintf('  %d of %d permutations\n', j, P2)
@@ -166,14 +166,14 @@ for j = 1 : P2
             min(puMN))
         fprintf('      corrected:    %g\n', ...
             min(pcMN))
-        fprintf('    number of voxels (of %d) at which\n', V)
+        fprintf('    number of voxels (of %d) at which (corrected)\n', V)
         fprintf('      global null hypothesis is rejected:    %d\n', ...
             sum(sigGN))
         fprintf('      majority null hypothesis is rejected:  %d\n', ...
             sum(sigMN))
         fprintf('      prevalence bound is defined:           %d\n', ...
-            sum(~isnan(gamma0)))
-        fprintf('    largest prevalence bound:  %g\n', max(gamma0))
+            sum(~isnan(gamma0c)))
+        fprintf('    largest corrected prevalence bound:  %g\n', max(gamma0c))
         fprintf('\n')
         
         % graphical display
@@ -188,8 +188,8 @@ for j = 1 : P2
         subplot(2, 1, 1)
         plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
         hold all
-        plot([0.5, V + 0.5], gamma0Max * [1 1], 'r')
-        plot(gamma0, 'b.')
+        plot([0.5, V + 0.5], gamma0cMax * [1 1], 'r')
+        plot(gamma0c, 'b.')
         axis([0.5, V + 0.5, 0, 1])
         title('prevalence lower bounds')
         ylabel('\gamma_0')
@@ -254,11 +254,11 @@ params.P1 = P1;
 params.P2 = P2;
 params.alpha = alpha;
 params.pcMNMin = pcMNMin;
-params.gamma0Max = gamma0Max;
+params.gamma0cMax = gamma0cMax;
 results = struct;
 results.puGN = puGN;
 results.pcGN = pcGN;
 results.puMN = puMN;
 results.pcMN = pcMN;
-results.gamma0 = gamma0;
+results.gamma0c = gamma0c;
 results.aTypical = aTypical;

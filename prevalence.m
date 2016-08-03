@@ -17,7 +17,7 @@ function prevalence(ifn, P2, alpha, prefix)
 %
 % With the default prefix, analysis results are written to the files
 %   prevalence_puGN.nii, prevalence_pcGN.nii, prevalence_puMN.nii,
-%   prevalence_pcMN.nii, prevalence_gamma0.nii, & prevalence_aTypical.nii.
+%   prevalence_pcMN.nii, prevalence_gamma0c.nii, & prevalence_aTypical.nii.
 % Additionally, the brain mask is written to prevalence_mask.nii, and
 % analysis parameters and properties to prevalence_params.mat.
 % For a detailed explanation, see output parameters `results` and `params`
@@ -84,7 +84,7 @@ fprintf('%d in-mask\n', size(a, 1));
 fprintf('\n')
 
 % perform prevalence inference
-[results, params] = prevalenceCore(a, P2, alpha);                       %#ok<ASGLU>
+[results, params] = prevalenceCore(a, P2, alpha);                           %#ok<ASGLU>
 
 % save
 fprintf('saving results and parameters\n')
