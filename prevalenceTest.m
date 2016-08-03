@@ -28,6 +28,9 @@
 %   d23d16395900d13c2e7b8976afc0edc5  prevalence_pcMN.nii
 %   8ac8c45ee7314adfc16172c451442a22  prevalence_puGN.nii
 %   d98ef36d1815e2632d0cd38358f95827  prevalence_puMN.nii
+%
+% This file is part of v1.0.1 of prevalence-permutation, see
+% https://github.com/allefeld/prevalence-permutation/releases
 
 clear, close all
 
