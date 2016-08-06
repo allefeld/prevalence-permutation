@@ -41,23 +41,31 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %
 % The function opens a figure window that shows results based on the
 % permutations generated so far and is regularly updated. If it is closed,
-% the computation is stopped (not aborted) and results are returned 
+% the computation is stopped (not aborted) and results are returned
 % based on the permutations so far.
 %
-% The window shows in the upper panel
-%  – pcMN for all voxels as blue dots,
-%  – pcMNMin as a red line, and
-%  – alpha as a black line (significance threshold),
-% and in the lower panel
-%  – gamma0c for all voxels as blue dots,
-%  – gamma0cMax as a red line, and
-%  – 0.5 as a black line (majority threshold).
-% The two panels are complementary representations of the same result,
-% corresponding to algorithm Step 5a and 5b, respectively (see paper).
+% The window shows in the upper panels
+%  -- p-values for the majority null hypothesis for all voxels (blue dots),
+%  -- the currently smallest possible p-value (red line),
+%  -- and the significance threshold alpha (black line).
+% In the left side uncorrected values, puMN and puMNMin,
+% and on the right side corrected values, pcMN and pcMNMin.
+% 
+% In the lower panels it shows
+%  -- prevalence lower bounds for all voxels (blue dots),
+%  -- the currently largest possible prevalence lower bound (red line),
+%  -- and the majority prevalence 0.5 (black line).
+% On the left side uncorrected values, gamma0u and gamma0uMax,
+% and on the right side corrected values, gamma0c and gamma0cMax.
+%
+% Upper and lower panels show complementary representations of the same
+% result, corresponding to algorithm Step 5a and 5b, respectively (see
+% paper).
+%
 % If many blue dots lie on the red line in either panel, this indicates
-% that a more differentiated picture might be obtained from more
-% permutations. (However, the amount of additional permutations needed for
-% that might be computationally unfeasible.)
+% that a more differentiated result might be obtained from more
+% permutations. However, the amount of additional permutations needed for
+% that might be computationally unfeasible.
 %
 % See also prevalence.
 %
@@ -87,12 +95,14 @@ if P2 > P1 ^ N
     error('Monte Carlo implementation is inadequate!')
     % implement full enumeration of permutations? (Issue #1)
 end
-fprintf('the computation can be stopped at any time by closing the output window\n\n')
+fprintf('the computation can be stopped by closing the output window\n\n')
 
 % prepare plot window
 fh = figure('Name', 'permutation-based prevalence inference using the minimum statistic');
+set(gcf, 'Position', get(gcf, 'Position') .* [1 1 0 0] + [0 0 800 580])
 text(0.5, 0.5, {'please wait for results', '', ...
-    'close window to stop computation at any time'}, 'HorizontalAlignment', 'center')
+    'close window to stop computation at any time'}, ...
+    'HorizontalAlignment', 'center')
 axis off
 drawnow
 
@@ -201,54 +211,56 @@ for j = 1 : P2
         % graphical display
         if stop
             fh = figure('Name', 'permutation-based prevalence inference using the minimum statistic');
+            set(gcf, 'Position', get(gcf, 'Position') .* [1 1 0 0] + [0 0 800 580])
         else
             % make figure current without getting in the way
             set(groot, 'CurrentFigure', fh)
             clf
         end
-        % majority null hypothesis p-values
-        subplot(2, 1, 1)
+        % majority null hypothesis p-values, uncorrected
+        subplot(2, 2, 1)
+        semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
+        hold all
+        plot([0.5, V + 0.5], puMNMin * [1 1], 'r')
+        plot(puMN, '.b')
+        title({'p-values majority null hypothesis', 'uncorrected'})
+        ylabel('p_N(m | \gamma \leq 0.5)')
+        xdeco
+        % majority null hypothesis p-values, corrected
+        subplot(2, 2, 2)
         semilogy([0.5, V + 0.5], alpha * [1 1], 'k')
         hold all
         plot([0.5, V + 0.5], pcMNMin * [1 1], 'r')
         plot(pcMN, '.b')
-        xlim([0.5, V + 0.5])
-        title('p-values majority null hypothesis')
+        title({'p-values majority null hypothesis', 'corrected'})
         ylabel('p^*_N(m | \gamma \leq 0.5)')
-        if V > 200
-            set(gca, 'XTick', [])
-        else
-            set(gca, 'XTick', 1 : V)
-            if V > 20
-                set(gca, 'XTickLabel', [])
-            end
-        end
-        % prevalence bounds
-        subplot(2, 1, 2)
+        xdeco
+        % prevalence bounds, uncorrected
+        subplot(2, 2, 3)
+        plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
+        hold all
+        plot([0.5, V + 0.5], gamma0uMax * [1 1], 'r')
+        plot(gamma0u, 'b.')
+        title({'prevalence lower bounds', 'uncorrected'})
+        ylabel('\gamma_0')
+        ylim([0, 1])
+        xdeco
+        % prevalence bounds, corrected
+        subplot(2, 2, 4)
         plot([0.5, V + 0.5], 0.5 * [1 1], 'k')
         hold all
         plot([0.5, V + 0.5], gamma0cMax * [1 1], 'r')
         plot(gamma0c, 'b.')
-        axis([0.5, V + 0.5, 0, 1])
-        title('prevalence lower bounds')
-        xlabel('voxels')
+        title({'prevalence lower bounds', 'corrected'})
         ylabel('\gamma_0^*')
-        if V > 200
-            set(gca, 'XTick', [])
-        else
-            set(gca, 'XTick', 1 : V)
-            if V > 20
-                set(gca, 'XTickLabel', [])
-            end
-        end
+        ylim([0, 1])
+        xdeco
+        % progress
         if j < P2
-            text(0.5, 1, sprintf(' %.0f %%', j / P2 * 100), ...
-                'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'left', ...
-                'VerticalAlignment', 'top')
-            text(V + 0.5, 1, sprintf('%.1f / %.1f min ', ...
-                toc / 60, toc / 60 * P2 / j), ...
-                'Color', [0.8 0.8 0.8], 'HorizontalAlignment', 'right', ...
-                'VerticalAlignment', 'top')
+            annotation(gcf, 'textbox', [0 0 1 1], 'Color', [1 0.65 0], ...
+                'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+                'String', sprintf(' %.0f %%          %.1f of %.1f min', ...
+                j / P2 * 100, toc / 60, toc / 60 * P2 / j))
         end
         drawnow
         
@@ -287,3 +299,19 @@ results.pcMN = pcMN;
 results.gamma0u = gamma0u;
 results.gamma0c = gamma0c;
 results.aTypical = aTypical;
+
+
+    function xdeco
+        % common plot x-axis decorations
+        xlabel('voxels')
+        xlim([0.5, V + 0.5])
+        if V > 200
+            set(gca, 'XTick', [])
+        else
+            set(gca, 'XTick', 1 : V)
+            if V > 20
+                set(gca, 'XTickLabel', [])
+            end
+        end
+    end
+end
