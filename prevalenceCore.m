@@ -15,6 +15,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .pcGN         corrected p-values for global null hypothesis           (Eq. 26)
 %   .puMN         uncorrected p-values for majority null hypothesis       (Eq. 19)
 %   .pcMN         corrected p-values for majority null hypothesis         (Eq. 21)
+%   .gamma0u      uncorrected prevalence lower bounds                     (Eq. 20)
 %   .gamma0c      corrected prevalence lower bounds                       (Eq. 23)
 %   .aTypical     median values of test statistic where pcMN <= alpha     (Fig. 4b)
 % params:        analysis parameters and properties
@@ -23,7 +24,9 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .P1           number of first-level permutations
 %   .P2           number of second-level permutations actually generated
 %   .alpha        significance level
+%   .puMNMin      smallest possible uncorrected p-value for majority H0
 %   .pcMNMin      smallest possible corrected p-value for majority H0
+%   .gamma0uMax   largest possible uncorrected prevalence lower bound
 %   .gamma0cMax   largest possible corrected prevalence lower bound       (Eq. 27)
 %
 % The 'majority null hypothesis' referenced here is a special case of the
@@ -155,12 +158,16 @@ for j = 1 : P2
         % lower bound on corrected p-values for majority null hypothesis
         puMNMin = ((1 - 0.5) * 1/j .^ (1/N) + 0.5) .^ N;
         pcMNMin = 1/j + (1 - 1/j) .* puMNMin;
-        % * Step 5b: compute lower bounds for prevalence
-        % lower bounds for prevalence
+        % * Step 5b: compute prevalence lower bounds for given alpha
+        % uncorrected prevalence lower bounds
+        gamma0u = (alpha .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 20
+        gamma0u(alpha < puGN) = nan;                    % undefined
+        % corrected prevalence lower bounds
         alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
         gamma0c = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
         gamma0c(alphac < puGN) = nan;                   % undefined
         % upper bound for lower bounds
+        gamma0uMax = (alpha .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));
         alphacMax = (alpha - 1/j) / (1 - 1/j);          % Eq. 27
         gamma0cMax = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
         
@@ -268,12 +275,15 @@ params.N = N;
 params.P1 = P1;
 params.P2 = P2;
 params.alpha = alpha;
+params.puMNMin = puMNMin;
 params.pcMNMin = pcMNMin;
+params.gamma0uMax = gamma0uMax;
 params.gamma0cMax = gamma0cMax;
 results = struct;
 results.puGN = puGN;
 results.pcGN = pcGN;
 results.puMN = puMN;
 results.pcMN = pcMN;
+results.gamma0u = gamma0u;
 results.gamma0c = gamma0c;
 results.aTypical = aTypical;

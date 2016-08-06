@@ -19,10 +19,11 @@
 % order to obtain reproducible results. Make sure to reinitialize it again
 % to a time-based seed afterwards: rng('shuffle')
 %
-% On 2016-7-31 with Matlab 8.5.0 (R2015a) and SPM8 r4290 under Linux 3.16,
-% this script generated image files with the following md5 checksums:
+% With Matlab 8.5.0 (R2015a) and SPM8 r4290, this script generates image
+% files with the following md5 checksums: 
 %   5e9967acd0fb7e63ee9d74839029519f  prevalence_aTypical.nii
 %   c1d1b791aa080e79e88105d36681d94b  prevalence_gamma0c.nii
+%   c830ddf72c6a30b0f0e228f2d9589232  prevalence_gamma0u.nii
 %   afb1c042ee7329832b2b895d576664b3  prevalence_mask.nii
 %   1b8a5e4edf0270f23e6bed54b9ae4b1f  prevalence_pcGN.nii
 %   d23d16395900d13c2e7b8976afc0edc5  prevalence_pcMN.nii
