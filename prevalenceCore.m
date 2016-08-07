@@ -175,11 +175,21 @@ for j = 1 : P2
         % corrected prevalence lower bounds
         alphac = (alpha - pcGN) ./ (1 - pcGN);          % Eq. 22
         gamma0c = (alphac .^ (1/N) - puGN .^ (1/N)) ./ (1 - puGN .^ (1/N)); % Eq. 23
-        gamma0c(alphac < puGN) = nan;                   % undefined
+        gamma0c(puGN > alphac) = nan;                   % undefined
         % upper bound for lower bounds
         gamma0uMax = (alpha .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N));
         alphacMax = (alpha - 1/j) / (1 - 1/j);          % Eq. 27
         gamma0cMax = (alphacMax .^ (1/N) - 1/j .^ (1/N)) ./ (1 - 1/j .^ (1/N)); % Eq. 27
+        % The criterion for the corrected prevalence lower bound to be
+        % defined, `puGN <= alphac`, is not equivalent to the significance
+        % criterion for the GN, `pcGN <= alpha`, but is slightly more
+        % conservative. A possible disagreement may be detected by
+        % comparing the lines
+        %   global null hypothesis is rejected
+        % and
+        %   prevalence bound is defined
+        % in the diagnostic output. The two numbers should normally be
+        % identical, but the second one can be smaller. 
         
         % print summary
         fprintf('  %d of %d permutations\n', j, P2)
