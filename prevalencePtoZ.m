@@ -4,6 +4,8 @@ function prevalencePtoZ(prefix)
 %
 % prevalencePtoZ(prefix)
 %
+% prefix:  prefix as used in a preceding run of `prevalence`
+%
 % See also prevalence
 %
 %
