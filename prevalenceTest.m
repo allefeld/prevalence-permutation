@@ -29,6 +29,17 @@
 %   d23d16395900d13c2e7b8976afc0edc5  prevalence_pcMN.nii
 %   8ac8c45ee7314adfc16172c451442a22  prevalence_puGN.nii
 %   d98ef36d1815e2632d0cd38358f95827  prevalence_puMN.nii
+%
+%
+% Copyright (C) 2016 Carsten Allefeld
+%
+% This program is free software: you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by the
+% Free Software Foundation, either version 3 of the License, or (at your
+% option) any later version. This program is distributed in the hope that
+% it will be useful, but without any warranty; without even the implied
+% warranty of merchantability or fitness for a particular purpose. See the
+% GNU General Public License <http://www.gnu.org/licenses/> for more details.
 
 clear, close all
 
