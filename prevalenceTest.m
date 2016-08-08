@@ -31,9 +31,6 @@
 %   d98ef36d1815e2632d0cd38358f95827  prevalence_puMN.nii
 %
 %
-% This file is part of v1.1.0 of prevalence-permutation, see
-% https://github.com/allefeld/prevalence-permutation/releases
-%
 % Copyright (C) 2016 Carsten Allefeld
 %
 % This program is free software: you can redistribute it and/or modify it
