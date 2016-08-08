@@ -41,7 +41,7 @@
 % warranty of merchantability or fitness for a particular purpose. See the
 % GNU General Public License <http://www.gnu.org/licenses/> for more details.
 
-clear, close all
+clear
 
 % check if data is present
 datadir = 'cichy-2011-category-smoothedaccuracy-1.0.0';

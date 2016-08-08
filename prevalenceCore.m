@@ -50,7 +50,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %  -- and the significance threshold alpha (black line).
 % In the left side uncorrected values, puMN and puMNMin,
 % and on the right side corrected values, pcMN and pcMNMin.
-% 
+%
 % In the lower panels it shows
 %  -- prevalence lower bounds for all voxels (blue dots),
 %  -- the currently largest possible prevalence lower bound (red line),
@@ -88,15 +88,6 @@ if (nargin < 3) || isempty(alpha)
     alpha = 0.05;
 end
 
-% init
-[V, N, P1] = size(a); % V: voxels, N: subjects, P1: first-level permutations
-fprintf('generating %d of %d second-level permutations\n', P2, P1 ^ N)
-if P2 > P1 ^ N
-    error('Monte Carlo implementation is inadequate!')
-    % implement full enumeration of permutations? (Issue #1)
-end
-fprintf('the computation can be stopped by closing the output window\n\n')
-
 % prepare plot window
 fh = figure('Name', 'permutation-based prevalence inference using the minimum statistic');
 set(gcf, 'Position', get(gcf, 'Position') .* [1 1 0 0] + [0 0 800 580])
@@ -106,22 +97,49 @@ text(0.5, 0.5, {'please wait for results', '', ...
 axis off
 drawnow
 
+% init
+[V, N, P1] = size(a); % V: voxels, N: subjects, P1: first-level permutations
+if P2 > P1 ^ N
+    fprintf('%d is larger than the number of possible second-level permutations\n', P2)
+    fprintf('please restart with parameter P2 = %d\n', P1 ^ N)
+    error('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+end
+enum = (P2 == P1 ^ N);
+if enum
+    fprintf('enumerating all %d second-level permutations\n\n', P2)
+else
+    fprintf('randomly generating %d of %d possible second-level permutations\n\n', ...
+        P2, P1 ^ N)
+end
+
 % generate second-level permutations
 uRank = zeros(V, 1);
 cRank = zeros(V, 1);
 nPermsReport = 1;
+fprintf('the computation can be stopped by closing the output window\n\n')
 tic
 for j = 1 : P2
     % select first-level permutations
-    if j == 1
-        % select neutral permutations
-        sp = ones(N, 1);
-    else
-        % select permutations randomly (Monte Carlo)
-        sp = randi(P1, N, 1);
+    if enum     % complete enumeration
+        % translate index of second-level permutation (j)
+        % into indices of first-level permutations (is)
+        jc = j - 1;
+        is = nan(N, 1);
+        for k = 1 : N
+            is(k) = rem(jc, P1) + 1;
+            jc = floor(jc / P1);
+        end
+    else        % Monte Carlo
+        % randomly select permutations, except for first
+        if j == 1
+            is = ones(N, 1);
+        else
+            is = randi(P1, N, 1);
+        end
     end
-    % indices of permutation values for each subject
-    ind = sub2ind([N, P1], (1 : N)', sp);
+    
+    % translate indices of first-level permutations to indices into a
+    ind = sub2ind([N, P1], (1 : N)', is);
     
     % test statistic: minimum across subjects
     m = min(a(:, ind), [], 2);
@@ -189,7 +207,7 @@ for j = 1 : P2
         % and
         %   prevalence bound is defined
         % in the diagnostic output. The two numbers should normally be
-        % identical, but the second one can be smaller. 
+        % identical, but the second one can be smaller.
         
         % print summary
         fprintf('  %d of %d permutations\n', j, P2)
