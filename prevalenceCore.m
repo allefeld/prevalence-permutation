@@ -67,6 +67,12 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % permutations. However, the amount of additional permutations needed for
 % that might be computationally unfeasible.
 %
+% If P2 is larger than the number of possible second-level permutations,
+% P1 ^ N, an error message recommends to set P2 = P1 ^ N. If this
+% recommendation is followed, Monte Carlo estimation is replaced by a
+% complete enumeration of all possible second-level permutations. In this
+% case, stopping the computation may bias the result.
+%
 % See also prevalence.
 %
 %
