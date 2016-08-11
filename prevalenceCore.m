@@ -129,7 +129,7 @@ for j = 1 : P2
     if enum     % complete enumeration
         % translate index of second-level permutation (j)
         % into indices of first-level permutations (is)
-        jc = j - 1;
+        jc = j - 1; % de2bi does the same
         is = nan(N, 1);
         for k = 1 : N
             is(k) = rem(jc, P1) + 1;

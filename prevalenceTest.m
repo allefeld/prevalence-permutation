@@ -20,7 +20,7 @@
 % to a time-based seed afterwards: rng('shuffle')
 %
 % With Matlab 8.5.0 (R2015a) and SPM8 r4290, this script generates image
-% files with the following md5 checksums: 
+% files with the following MD5 checksums: 
 %   5e9967acd0fb7e63ee9d74839029519f  prevalence_aTypical.nii
 %   c1d1b791aa080e79e88105d36681d94b  prevalence_gamma0c.nii
 %   c830ddf72c6a30b0f0e228f2d9589232  prevalence_gamma0u.nii
@@ -77,11 +77,16 @@ prevalence(input, P2, alpha, prefix)
 rng('shuffle')
 
 % compute checksums of results
-fprintf('\nchecksums of results:\n')
-if isunix
-    system(['md5sum ' tn '/*.nii']);
-else
-    system(['certutil -hashfile ' tn '/*.nii MD5']); % DOES THIS WORK?
+fprintf('\nMD5 checksums of results:\n')
+d = dir([tn '/*.nii']);
+for l = 1 : numel(d)
+    fid = fopen([tn '/' d(l).name], 'rb');
+    bytes = fread(fid, 'uint8=>uint8');
+    fclose(fid);
+    algIns = java.security.MessageDigest.getInstance('MD5');
+    md5Str = lower(reshape(dec2hex(typecast(...
+        algIns.digest(bytes), 'uint8'))', 1, []));
+    fprintf('%s  %s\n', md5Str, d(l).name)
 end
 
 fprintf('\nconsider deleting the directory %s and its contents\n', tn)
