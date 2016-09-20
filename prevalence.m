@@ -93,10 +93,10 @@ f = fields(results);
 for fi = 1 : numel(f)
     data = nan(vol(1).dim);
     data(mask) = getfield(results, f{fi});                                  %#ok<GFLD>
-    saveMRImage(data, [prefix f{fi} '.nii'], vol(1).mat, f{fi})
+    spmWriteImage(data, [prefix f{fi} '.nii'], vol(1).mat, 'descrip', f{fi})
 end
 % brain mask (values end up to be 1.00000005913898 instead of 1 – why?)
-mask = reshape(mask, vol(1).dim);
-saveMRImage(uint8(mask), [prefix 'mask.nii'], vol(1).mat, 'prevalence brain mask')
+spmWriteImage(reshape(mask, vol(1).dim), [prefix 'mask.nii'], vol(1).mat, ...
+    'descrip', 'prevalence brain mask')
 % analysis parameters and properties
 save([prefix 'params'], '-struct', 'params')

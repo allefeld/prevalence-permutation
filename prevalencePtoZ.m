@@ -38,5 +38,6 @@ for ni = 1 : numel(d)
     Vi = spm_vol(ifn);
     p = spm_read_vols(Vi);
     z = sqrt(2) * erfinv(1 - 2 * p);
-    saveMRImage(z, ofn, Vi.mat, ['z' d(ni).name(numel(name) + 2 : end - 4)])
+    spmWritemage(z, ofn, Vi.mat, ...
+        'descrip', ['z' d(ni).name(numel(name) + 2 : end - 4)])
 end
