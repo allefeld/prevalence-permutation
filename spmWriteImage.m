@@ -81,20 +81,14 @@ if isempty(p.mat0_intent)
 end
 
 % check dimensionality
-if numel(dim) > 7
-    error('data can only be up to 7D')
-end
+assert(numel(dim) <= 7, 'data can only be up to 7D')
 
 % set datatype according to class(Y)
 if islogical(Y)
     Y = uint8(Y);
 end
-if ~isnumeric(Y)
-    error('data must be numeric')
-end
-if ~isreal(Y)
-    error('complex data are not supported')
-end
+assert(isnumeric(Y), 'data must be numeric')
+assert(isreal(Y), 'complex data are not supported')
 dtype = class(Y);
 switch dtype
     case 'single'
@@ -125,7 +119,6 @@ create(N)
 
 % write data
 if (p.scl_slope == 1) && (p.scl_inter == 0)
-    fprintf('a\n')
     N.dat(:) = Y(:);
 else
     fprintf('b\n')
@@ -146,3 +139,4 @@ end
 % it will be useful, but without any warranty; without even the implied
 % warranty of merchantability or fitness for a particular purpose. See the
 % GNU General Public License <http://www.gnu.org/licenses/> for more details.
+
