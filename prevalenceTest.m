@@ -32,14 +32,6 @@
 %
 %
 % Copyright (C) 2016 Carsten Allefeld
-%
-% This program is free software: you can redistribute it and/or modify it
-% under the terms of the GNU General Public License as published by the
-% Free Software Foundation, either version 3 of the License, or (at your
-% option) any later version. This program is distributed in the hope that
-% it will be useful, but without any warranty; without even the implied
-% warranty of merchantability or fitness for a particular purpose. See the
-% GNU General Public License <http://www.gnu.org/licenses/> for more details.
 
 clear
 
@@ -78,15 +70,25 @@ rng('shuffle')
 
 % compute checksums of results
 fprintf('\nMD5 checksums of results:\n')
-d = dir([tn '/*.nii']);
+d = dir([tn filesep '*.nii']);
 for l = 1 : numel(d)
-    fid = fopen([tn '/' d(l).name], 'rb');
+    fid = fopen([tn filesep d(l).name], 'rb');
     bytes = fread(fid, 'uint8=>uint8');
     fclose(fid);
-    algIns = java.security.MessageDigest.getInstance('MD5');
+    md5Ins = java.security.MessageDigest.getInstance('MD5');
     md5Str = lower(reshape(dec2hex(typecast(...
-        algIns.digest(bytes), 'uint8'))', 1, []));
+        md5Ins.digest(bytes), 'uint8'))', 1, []));
     fprintf('%s  %s\n', md5Str, d(l).name)
 end
 
 fprintf('\nconsider deleting the directory %s and its contents\n', tn)
+
+
+% This program is free software: you can redistribute it and/or modify it
+% under the terms of the GNU General Public License as published by the
+% Free Software Foundation, either version 3 of the License, or (at your
+% option) any later version. This program is distributed in the hope that
+% it will be useful, but without any warranty; without even the implied
+% warranty of merchantability or fitness for a particular purpose. See the
+% GNU General Public License <http://www.gnu.org/licenses/> for more details.
+
