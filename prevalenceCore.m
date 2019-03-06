@@ -6,11 +6,11 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % [results, params] = prevalenceCore(a, P2 = 1e6, alpha = 0.05)
 %
 % a:            three-dimensional array of test statistic values
-%               (voxels x subjects x first-level permutations)
+%               (test units x subjects x first-level permutations)
 %               a(:, :, 1) must contain actual values
 % P2:           number of second-level permutations to generate
 % alpha:        significance level
-% results:      per-voxel analysis results
+% results:      per-test unit analysis results
 %   .puGN         uncorrected p-values for global null hypothesis         (Eq. 24)
 %   .pcGN         corrected p-values for global null hypothesis           (Eq. 26)
 %   .puMN         uncorrected p-values for majority null hypothesis       (Eq. 19)
@@ -19,7 +19,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .gamma0c      corrected prevalence lower bounds                       (Eq. 23)
 %   .aTypical     median values of test statistic where pcMN <= alpha     (Fig. 4b)
 % params:        analysis parameters and properties
-%   .V            number of voxels
+%   .V            number of test units
 %   .N            number of subjects
 %   .P1           number of first-level permutations
 %   .P2           number of second-level permutations actually generated
@@ -28,6 +28,14 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 %   .pcMNMin      smallest possible corrected p-value for majority H0
 %   .gamma0uMax   largest possible uncorrected prevalence lower bound
 %   .gamma0cMax   largest possible corrected prevalence lower bound       (Eq. 27)
+%
+% 'Test units' may correspond to different locations (voxels, sensors)
+% different time points, or both. The user must take care that the
+% 'spatially extended version of the prevalence null' (section 'Information
+% maps' of Allefeld, Goergen and Haynes 2016) does make sense for the given
+% set of test units, where "in a small area" translates to "in a small
+% subset of test units". Otherwise the *corrected* p-values for the
+% majority null and the *corrected* prevalence lower bounds are wrong.
 %
 % The 'majority null hypothesis' referenced here is a special case of the
 % prevalence null hypothesis (Eq. 17), where the critical value is gamma0 =
@@ -45,14 +53,14 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % based on the permutations so far.
 %
 % The window shows in the upper panels
-%  -- p-values for the majority null hypothesis for all voxels (blue dots),
+%  -- p-values for the majority null hypothesis for all test units (blue dots),
 %  -- the currently smallest possible p-value (red line),
 %  -- and the significance threshold alpha (black line).
 % In the left side uncorrected values, puMN and puMNMin,
 % and on the right side corrected values, pcMN and pcMNMin.
 %
 % In the lower panels it shows
-%  -- prevalence lower bounds for all voxels (blue dots),
+%  -- prevalence lower bounds for all test units (blue dots),
 %  -- the currently largest possible prevalence lower bound (red line),
 %  -- and the majority prevalence 0.5 (black line).
 % On the left side uncorrected values, gamma0u and gamma0uMax,
@@ -76,7 +84,7 @@ function [results, params] = prevalenceCore(a, P2, alpha)
 % See also prevalence.
 %
 %
-% Copyright (C) 2016 Carsten Allefeld
+% Copyright (C) 2016–2019 Carsten Allefeld
 %
 % This program is free software: you can redistribute it and/or modify it
 % under the terms of the GNU General Public License as published by the
@@ -104,7 +112,8 @@ axis off
 drawnow
 
 % init
-[V, N, P1] = size(a); % V: voxels, N: subjects, P1: first-level permutations
+[V, N, P1] = size(a);
+% V: test units, N: subjects, P1: first-level permutations
 if P2 > P1 ^ N
     fprintf('%d is larger than the number of possible second-level permutations\n', P2)
     fprintf('please restart with parameter P2 = %d\n', P1 ^ N)
@@ -149,15 +158,15 @@ for j = 1 : P2
     
     % test statistic: minimum across subjects
     m = min(a(:, ind), [], 2);
-    % store result of neutral permutation (actual value) for each voxel
+    % store result of neutral permutation (actual value) for each test unit
     if j == 1
         m1 = m;
     end
     
-    % compare actual value with permutation value for each voxel separately,
+    % compare actual value with permutation value for each test unit separately,
     % determines uncorrected p-values for global null hypothesis (see below)
     uRank = uRank + (m >= m1);          % part of Eq. 24
-    % compare actual value at each voxel with maximum across voxels,
+    % compare actual value at each test unit with maximum across units,
     % determines corrected p-values for global null hypothesis (see below)
     cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
     
@@ -179,7 +188,7 @@ for j = 1 : P2
         puGN = uRank / j;                               % part of Eq. 24
         % corrected p-values for global null hypothesis
         pcGN = cRank / j;                               % part of Eq. 26
-        % significant voxels for global null hypothesis
+        % significant test units for global null hypothesis
         sigGN = (pcGN <= alpha);
         % * Step 5a: compute p-values for given prevalence bound
         % (here specifically gamma0 = 0.5, i.e the majority null hypothesis)
@@ -187,7 +196,7 @@ for j = 1 : P2
         puMN = ((1 - 0.5) * puGN .^ (1/N) + 0.5) .^ N;  % Eq. 19
         % corrected p-values for majority null hypothesis
         pcMN = pcGN + (1 - pcGN) .* puMN;               % Eq. 21
-        % significant voxels for majority null hypothesis
+        % significant test units for majority null hypothesis
         sigMN = (pcMN <= alpha);
         % lower bound on corrected p-values for majority null hypothesis
         puMNMin = ((1 - 0.5) * 1/j .^ (1/N) + 0.5) .^ N;
@@ -218,9 +227,9 @@ for j = 1 : P2
         % print summary
         fprintf('  %d of %d permutations\n', j, P2)
         fprintf('    minimal rank\n')
-        fprintf('      uncorrected:  %d,  reached at %d voxels\n', ...
+        fprintf('      uncorrected:  %d,  reached in %d test units\n', ...
             min(uRank), sum(uRank == min(uRank)))
-        fprintf('      corrected:    %d,  reached at %d voxels\n', ...
+        fprintf('      corrected:    %d,  reached in %d test units\n', ...
             min(cRank), sum(cRank == min(cRank)))
         fprintf('    minimal p-value for global null hypothesis\n')
         fprintf('      uncorrected:  %g\n', ...
@@ -232,7 +241,7 @@ for j = 1 : P2
             min(puMN))
         fprintf('      corrected:    %g\n', ...
             min(pcMN))
-        fprintf('    number of voxels (of %d) at which (corrected)\n', V)
+        fprintf('    number of test units (of %d) in which (corrected)\n', V)
         fprintf('      global null hypothesis is rejected:    %d\n', ...
             sum(sigGN))
         fprintf('      majority null hypothesis is rejected:  %d\n', ...
@@ -337,7 +346,7 @@ results.aTypical = aTypical;
 
     function xdeco
         % common plot x-axis decorations
-        xlabel('voxels')
+        xlabel('test units (voxels)')
         xlim([0.5, V + 0.5])
         if V > 200
             set(gca, 'XTick', [])
