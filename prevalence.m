@@ -1,4 +1,4 @@
-function prevalence(ifn, P2, alpha, prefix)
+function prevalence(ifn, P2, alpha, prefix, mask)
 
 % permutation-based prevalence inference using the minimum statistic
 %
@@ -75,8 +75,10 @@ spm_check_orientations(vol(:));
 a = cell2mat(reshape(a, [1, N, P1]));
 % a is now a matrix of size (number of voxels) x N x P1
 fprintf('%d voxels, ', size(a, 1));
-% determine mask from data; out-of-mask voxels may be NaN or 0
-mask = all(all(~isnan(a), 2), 3) & ~any(all(a == 0, 3), 2);
+if nargin < 5
+    % determine mask from data; out-of-mask voxels may be NaN or 0
+    mask = all(all(~isnan(a), 2), 3) & ~any(all(a == 0, 3), 2);
+end
 % truncate data to in-mask voxels
 a = a(mask, :, :);
 % a is now a matrix of size (number of in-mask voxels) x N x P1
@@ -95,7 +97,7 @@ for fi = 1 : numel(f)
     data(mask) = getfield(results, f{fi});                                  %#ok<GFLD>
     spmWriteImage(data, [prefix f{fi} '.nii'], vol(1).mat, 'descrip', f{fi})
 end
-% brain mask (values end up to be 1.00000005913898 instead of 1 – why?)
+% brain mask
 spmWriteImage(reshape(mask, vol(1).dim), [prefix 'mask.nii'], vol(1).mat, ...
     'descrip', 'prevalence brain mask')
 % analysis parameters and properties
