@@ -132,7 +132,7 @@ uRank = zeros(V, 1);
 cRank = zeros(V, 1);
 nPermsReport = 1;
 fprintf('the computation can be stopped by closing the output window\n\n')
-tic
+tstart = tic;
 for j = 1 : P2
     % select first-level permutations
     if enum     % complete enumeration
@@ -171,7 +171,7 @@ for j = 1 : P2
     cRank = cRank + (max(m) >= m1);     % Eq. 25 & part of Eq. 26
     
     % calibrate reporting interval to be between 2 and 5 seconds
-    if (nPermsReport == 1) && (toc >= 2)
+    if (nPermsReport == 1) && (toc(tstart) >= 2)
         nPermsReport = 10 ^ floor(log10(j)) * [1 2 5 10];
         nPermsReport = min(nPermsReport(nPermsReport >= j));
         nPermsReport = max(nPermsReport, 2);
@@ -303,7 +303,7 @@ for j = 1 : P2
             annotation(gcf, 'textbox', [0 0 1 1], 'Color', [1 0.65 0], ...
                 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
                 'String', sprintf(' %.0f %%          %.1f of %.1f min', ...
-                j / P2 * 100, toc / 60, toc / 60 * P2 / j))
+                j / P2 * 100, toc(tstart) / 60, toc(tstart) / 60 * P2 / j))
         end
         drawnow
         
