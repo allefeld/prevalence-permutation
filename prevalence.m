@@ -2,14 +2,15 @@ function prevalence(ifn, P2, alpha, prefix, mask)
 
 % permutation-based prevalence inference using the minimum statistic
 %
-% prevalence(ifn, P2 = 1e6, alpha = 0.05, prefix = 'prevalence_')
+% prevalence(ifn, P2 = 1e6, alpha = 0.05, prefix = 'prevalence_', mask)
 %
 % ifn:     cell array of input image filenames of test statistic values
 %          (subjects x permutations)
 %          images in ifn(:, 1) must contain actual values
 % P2:      number of second-level permutations to perform
-% prefix:  prefix for output files
 % alpha:   significance level
+% prefix:  prefix for output files
+% mask:    brain mask
 %
 % Results are written to files that begin with the string given in
 % `prefix`. By including a path in `prefix`, the output file directory can
