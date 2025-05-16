@@ -49,9 +49,6 @@ function N = spmWriteImage(Y, fname, mat, varargin)
 % that 'scl_slope' and 'scl_inter' are stored only with single precision.
 %
 % See also spmCoords, nifti/Contents
-%
-%
-% Copyright (C) 2016 Carsten Allefeld
 
 
 % allow Y to be {dim, init}, initializing data
@@ -132,11 +129,6 @@ if nargout == 0
 end
 
 
-% This program is free software: you can redistribute it and/or modify it
-% under the terms of the GNU General Public License as published by the
-% Free Software Foundation, either version 3 of the License, or (at your
-% option) any later version. This program is distributed in the hope that
-% it will be useful, but without any warranty; without even the implied
-% warranty of merchantability or fitness for a particular purpose. See the
-% GNU General Public License <http://www.gnu.org/licenses/> for more details.
+% Copyright © 2016–2023 Carsten Allefeld
+% SPDX-License-Identifier: GPL-3.0-or-later
 
